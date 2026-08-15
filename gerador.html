@@ -508,7 +508,7 @@
     <div class="campo">
       <label>1. Cole o Link do Mercado Livre / Afiliado</label>
       <div class="campo-input-btn">
-        <input type="text" id="inputUrl" placeholder="Cole aqui o link (ex: https://meli.la/2Zt525k)" value="https://meli.la/2Zt525k">
+        <input type="text" id="inputUrl" placeholder="Cole aqui o link (ex: https://meli.la/...)" value="">
         <button type="button" class="btn-buscar" id="btnBuscar" onclick="buscarDadosOferta()">
           <span>🔍 Buscar</span>
         </button>
@@ -1039,9 +1039,18 @@ $('#inputTitulo').addEventListener('input', () => {
   $(`#${id}`).addEventListener('change', atualizarPreview);
 });
 
-// Auto-busca ao colar novo link
+// Auto-busca ao colar novo link ou pressionar Enter
 $('#inputUrl').addEventListener('paste', () => {
-  setTimeout(buscarDadosOferta, 100);
+  setTimeout(buscarDadosOferta, 50);
+});
+$('#inputUrl').addEventListener('change', () => {
+  if ($('#inputUrl').value.trim().startsWith('http')) buscarDadosOferta();
+});
+$('#inputUrl').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    buscarDadosOferta();
+  }
 });
 
 async function buscarDadosOferta() {
