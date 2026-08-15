@@ -204,20 +204,42 @@ if (!codigo && location.pathname.includes('/p/')){
 
 async function carregarOfertas(){
   let ofertas = Object.assign({}, OFERTAS_LOCAIS);
+  // 1. Tenta pegar de /p/ofertas.json local (com caminho absoluto)
   try {
-    const res = await fetch('ofertas.json?v=' + Date.now());
+    const res = await fetch('/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
     if (res.ok) {
       const dados = await res.json();
       ofertas = Object.assign(ofertas, dados);
     }
-  } catch (e) {
-    console.log('Usando ofertas locais fallback');
+  } catch (e) {}
+
+  // 2. Se a oferta específica não estiver no arquivo local, busca no GitHub Raw em tempo real
+  if (!ofertas[codigo]) {
+    try {
+      const resGh = await fetch('https://raw.githubusercontent.com/MjuniorFacic/paizao-site/main/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
+      if (resGh.ok) {
+        const dadosGh = await resGh.json();
+        ofertas = Object.assign(ofertas, dadosGh);
+      }
+    } catch (e) {}
   }
+
   return ofertas;
 }
 
 /* ---------- REDIRECIONA ---------- */
 async function processar(){
+  if (!codigo) {
+    document.body.classList.add('visivel');
+    card.innerHTML = `
+      <div class="icone-encerrada">×</div>
+      <h2>Oferta Não Encontrada</h2>
+      <p>Nenhuma oferta foi informada no link.</p>
+      <p style="margin-top:4px">Mas as promoções continuam rolando nos grupos do WhatsApp 👇</p>
+      <a href="../grupos/" class="btn-voltar">Ver ofertas nos grupos →</a>`;
+    return;
+  }
+
   const ofertas = await carregarOfertas();
   const oferta = ofertas[codigo];
   const urlFinal = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
@@ -228,14 +250,10 @@ async function processar(){
   } else {
     /* ---------- OFERTA ENCERRADA / NÃO ENCONTRADA ---------- */
     document.body.classList.add('visivel');
-    const msg = codigo
-      ? 'Essa oferta não existe mais ou o link foi atualizado.'
-      : 'Nenhuma oferta foi informada no link.';
-
     card.innerHTML = `
       <div class="icone-encerrada">×</div>
       <h2>Oferta Encerrada</h2>
-      <p>${msg}</p>
+      <p>Essa oferta não existe mais ou o link foi atualizado.</p>
       <p style="margin-top:4px">Mas as promoções continuam rolando nos grupos do WhatsApp 👇</p>
       <a href="../grupos/" class="btn-voltar">Ver ofertas nos grupos →</a>`;
   }
