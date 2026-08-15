@@ -531,11 +531,11 @@
     <div class="grid-2">
       <div class="campo">
         <label>Preço "De" (R$)</label>
-        <input type="text" id="inputPrecoDe" value="2399" placeholder="ex: 2399">
+        <input type="text" id="inputPrecoDe" value="" placeholder="ex: 199,90 (opcional)">
       </div>
       <div class="campo">
         <label>Preço "Por" (R$)</label>
-        <input type="text" id="inputPrecoPor" value="1952" placeholder="ex: 1952">
+        <input type="text" id="inputPrecoPor" value="" placeholder="ex: 79,90">
       </div>
     </div>
 
@@ -1069,9 +1069,15 @@ async function buscarDadosOferta() {
                                  doc.querySelector('meta[name="image"]')?.content ||
                                  doc.querySelector('.ui-pdp-image')?.src || '';
               }
-              const precoMatch = html.match(/andes-money-amount__fraction["']?>([0-9\.\,]+)</);
+              const precoMatch = html.match(/"price":\s*([0-9\.]+)/) ||
+                                 html.match(/"lowPrice":\s*([0-9\.]+)/) ||
+                                 html.match(/andes-money-amount__fraction["']?>([0-9\.\,]+)</) ||
+                                 html.match(/R\$\s*([0-9\.\,]+)/);
               if (precoMatch && precoMatch[1]) {
-                precoExtraido = precoMatch[1].replace('.','');
+                let p = precoMatch[1].replace('.', ',');
+                if (!p.includes(',')) p += ',00';
+                else if (p.split(',')[1].length === 1) p += '0';
+                precoExtraido = p;
               }
               break;
             }
