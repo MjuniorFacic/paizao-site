@@ -391,11 +391,18 @@ if (MODO_UNICO){
 }
 
 // botões principais → primeiro grupo com vaga
+// botões principais → primeiro grupo com vaga (abre direto no app do WhatsApp)
 function irParaGrupo(e){
-  e.preventDefault();
-  if (!destino) { toast('Todos os grupos estão cheios no momento 😥'); return; }
-  toast('Abrindo o WhatsApp...');
-  setTimeout(() => window.open(destino, '_blank', 'noopener'), 350);
+  if (!destino) {
+    e.preventDefault();
+    toast('Todos os grupos estão cheios no momento 😥');
+    return;
+  }
+  window.location.href = destino;
+}
+if (destino) {
+  $('#btnTopo').href = destino;
+  $('#btnFixo').href = destino;
 }
 $('#btnTopo').addEventListener('click', irParaGrupo);
 $('#btnFixo').addEventListener('click', irParaGrupo);
