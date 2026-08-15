@@ -603,8 +603,8 @@
       <a id="btnBaixarFoto" class="btn btn-secundario" href="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" target="_blank" download="produto.jpg">
         📸 Abrir / Baixar Imagem
       </a>
-      <button class="btn btn-salvar" onclick="salvarOfertaLocal()">
-        💾 Salvar Oferta
+      <button class="btn btn-salvar" id="btnSalvarPublicar" onclick="salvarEPublicar()">
+        🚀 Salvar & Publicar no Site (Netlify)
       </button>
     </div>
   </div>
@@ -1074,17 +1074,106 @@ function copiarPost() {
   });
 }
 
-function salvarOfertaLocal() {
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode('0x' + p1);
+  }));
+}
+
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
+async function salvarEPublicar() {
+  const btn = $('#btnSalvarPublicar');
   const slug = $('#inputSlug').value.trim();
   const url = $('#inputUrl').value.trim();
   const titulo = $('#inputTitulo').value.trim();
   const por = $('#inputPrecoPor').value.trim();
+  const de = $('#inputPrecoDe').value.trim();
+  const loja = $('#inputChamada').value.trim();
 
+  if (!slug || !url) {
+    toast('⚠️ Preencha o link e o código da oferta!');
+    return;
+  }
+
+  btn.textContent = '⏳ Publicando no Netlify...';
+  btn.style.opacity = '0.7';
+
+  // 1. Salva no navegador (localStorage)
   let salvas = JSON.parse(localStorage.getItem('paizao_ofertas') || '{}');
-  salvas[slug] = { url, titulo, preco: por, salvo_em: new Date().toISOString() };
+  salvas[slug] = { url, titulo, preco_de: de, preco_por: por, salvo_em: new Date().toISOString() };
   localStorage.setItem('paizao_ofertas', JSON.stringify(salvas));
 
-  toast(`✅ Oferta '${slug}' salva com sucesso!`);
+  // 2. Publica no GitHub via API
+  const token = localStorage.getItem('gh_token') || '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';
+  try {
+    const repo = 'MjuniorFacic/paizao-site';
+    const filePath = 'p/ofertas.json';
+    
+    // Busca versão atual do arquivo
+    const resGet = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    let currentJson = {};
+    let sha = '';
+    if (resGet.ok) {
+      const data = await resGet.json();
+      sha = data.sha;
+      const decoded = b64DecodeUnicode(data.content.replace(/\s/g, ''));
+      currentJson = JSON.parse(decoded);
+    }
+
+    // Adiciona / atualiza a oferta
+    currentJson[slug] = {
+      url: url,
+      titulo: titulo,
+      preco_de: de ? Number(de.replace(/\D/g,'')) : null,
+      preco_por: por ? Number(por.replace(/\D/g,'')) : null,
+      loja: loja,
+      criado_em: new Date().toISOString().slice(0, 16).replace('T', ' ')
+    };
+
+    const novoConteudo = JSON.stringify(currentJson, null, 2);
+    const encoded = b64EncodeUnicode(novoConteudo);
+
+    // Envia atualização para o GitHub
+    const resPut = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Publicar oferta: ${slug}`,
+        content: encoded,
+        sha: sha
+      })
+    });
+
+    if (resPut.ok) {
+      toast(`🚀 Publicado com sucesso! Netlify atualizando em 10s!`);
+      copiarPost();
+    } else {
+      toast(`✅ Salvo localmente! (GitHub status: ${resPut.status})`);
+      copiarPost();
+    }
+  } catch (err) {
+    console.error(err);
+    toast(`✅ Salvo localmente! Post pronto no WhatsApp!`);
+    copiarPost();
+  } finally {
+    btn.textContent = '🚀 Salvar & Publicar no Site (Netlify)';
+    btn.style.opacity = '1';
+  }
 }
 
 // Inicializa a toolbar de emojis dinâmicos
