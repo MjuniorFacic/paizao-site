@@ -1,4 +1,4 @@
-﻿{
+{
     "lixeira-inteligente-automatica":  {
                                            "criado_em":  "2026-08-14 20:24",
                                            "preco":  "De R$ 120 por R$ 59",
@@ -49,5 +49,13 @@
                                   "url":  "https://meli.la/161cnwd",
                                   "loja":  "Mercado Livre",
                                   "titulo":  "Mercusys MC510 Câmera Segurança Wifi 2K 360° Externo por TP-Link"
+                              },
+    "tenis-masculino-feminino":  {
+                                  "criado_em":  "2026-08-15 17:15",
+                                  "preco_de":  169.99,
+                                  "preco_por":  79.70,
+                                  "url":  "https://meli.la/2hM3zDH",
+                                  "loja":  "Pegar Promoção do Paizão",
+                                  "titulo":  "Tênis Masculino Feminino Kappa Park 2.0 Original"
                               }
 }

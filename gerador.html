@@ -637,7 +637,7 @@
 </div>
 
 <div class="toast" id="toast">✅ Post copiado com sucesso!</div>
-
+<script src="config.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 
@@ -1208,7 +1208,7 @@ async function salvarEPublicar() {
   localStorage.setItem('paizao_ofertas', JSON.stringify(salvas));
 
   // 2. Publica no GitHub via API
-  const token = localStorage.getItem('gh_token') || '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';
+  const token = (window.PAIZAO_CONFIG && window.PAIZAO_CONFIG.gh_token) || localStorage.getItem('gh_token') || '';
   try {
     const repo = 'MjuniorFacic/paizao-site';
     const filePath = 'p/ofertas.json';
@@ -1234,8 +1234,8 @@ async function salvarEPublicar() {
     currentJson[slug] = {
       url: url,
       titulo: titulo,
-      preco_de: de ? Number(de.replace(/\D/g,'')) : null,
-      preco_por: por ? Number(por.replace(/\D/g,'')) : null,
+      preco_de: de ? (de.includes(',') ? de : Number(de.replace(/\D/g,''))) : null,
+      preco_por: por ? (por.includes(',') ? por : Number(por.replace(/\D/g,''))) : null,
       loja: loja,
       criado_em: new Date().toISOString().slice(0, 16).replace('T', ' ')
     };
@@ -1259,10 +1259,11 @@ async function salvarEPublicar() {
     });
 
     if (resPut.ok) {
-      toast(`🚀 Publicado com sucesso! Netlify atualizando em 10s!`);
+      toast(`🚀 Publicado no GitHub! O link estará ativo no Netlify em 10s!`);
       copiarPost();
     } else {
-      toast(`✅ Salvo localmente! (GitHub status: ${resPut.status})`);
+      console.error('GitHub PUT error:', resPut.status);
+      toast(`⚠️ Salvo localmente! (GitHub status: ${resPut.status})`);
       copiarPost();
     }
   } catch (err) {
@@ -1270,7 +1271,7 @@ async function salvarEPublicar() {
     toast(`✅ Salvo localmente! Post pronto no WhatsApp!`);
     copiarPost();
   } finally {
-    btn.textContent = '🚀 Salvar & Publicar no Site (Netlify)';
+    btn.textContent = '🚀 1º Passo: Salvar & Publicar no Site (Netlify)';
     btn.style.opacity = '1';
   }
 }
