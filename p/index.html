@@ -178,20 +178,9 @@ async function processar(){
   const urlFinal = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
 
   if (urlFinal){
-    card.innerHTML = `
-      <div class="spinner whats"></div>
-      <h2>Abrindo a oferta...</h2>
-      <p>Se não abrir automaticamente, toque no botão abaixo.</p>
-      <a href="${urlFinal}" target="_blank" rel="noopener sponsored"
-         class="btn-voltar" style="margin-top:18px">Abrir oferta →</a>
-      <div class="dica">Você será redirecionado em instantes</div>`;
-
-    const abrir = () => window.open(urlFinal, '_blank', 'noopener');
-    if (document.visibilityState === 'hidden'){
-      abrir();
-    } else {
-      setTimeout(abrir, 900);
-    }
+    // Redirecionamento nativo e instantâneo (sem delay e sem bloqueio de pop-up)
+    window.location.replace(urlFinal);
+    return;
   } else {
     /* ---------- OFERTA ENCERRADA / NÃO ENCONTRADA ---------- */
     const msg = codigo
