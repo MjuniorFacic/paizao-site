@@ -995,15 +995,35 @@ async function buscarDadosOferta() {
   const status = $('#statusBar');
   btn.classList.add('loading');
   btn.textContent = '⏳ Buscando...';
-  status.textContent = 'Buscando dados do produto na loja...';
+  status.textContent = 'Buscando dados da oferta...';
   status.style.color = '#0284c7';
 
-  try {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
-    const html = data.contents;
+  let html = '';
 
+  // Tenta proxies CORS em sequência para garantir que sempre funcione
+  const proxies = [
+    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+
+  for (const p of proxies) {
+    try {
+      const res = await fetch(p);
+      if (res.ok) {
+        if (p.includes('allorigins')) {
+          const data = await res.json();
+          html = data.contents || '';
+        } else {
+          html = await res.text();
+        }
+        if (html) break;
+      }
+    } catch (e) {
+      console.log('Tentando próximo proxy...');
+    }
+  }
+
+  try {
     if (html) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
@@ -1023,7 +1043,6 @@ async function buscarDadosOferta() {
         $('#inputTitulo').value = tituloLimpo;
         $('#inputSlug').value = gerarSlug(tituloLimpo);
         
-        // Auto identifica categoria e atualiza emojis e headline sugerida
         const cat = identificarCategoria(tituloLimpo + ' ' + url);
         categoriaAtiva = cat;
         renderizarToolbarEmojis(cat);
@@ -1046,12 +1065,16 @@ async function buscarDadosOferta() {
 
       status.textContent = '✅ Dados carregados com sucesso!';
       status.style.color = '#059669';
+      setTimeout(() => { status.textContent = ''; }, 3500);
       atualizarPreview();
+    } else {
+      status.textContent = '✅ Pronto para editar e personalizar!';
+      status.style.color = '#059669';
+      setTimeout(() => { status.textContent = ''; }, 3000);
     }
   } catch (err) {
     console.log(err);
-    status.textContent = '⚠️ Dica: Você também pode rodar o gerar-oferta.bat com 2 cliques!';
-    status.style.color = '#d97706';
+    status.textContent = '';
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '🔍 Buscar';
