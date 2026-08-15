@@ -1,61 +1,69 @@
 {
-    "lixeira-inteligente-automatica":  {
-                                           "criado_em":  "2026-08-14 20:24",
-                                           "preco":  "De R$ 120 por R$ 59",
-                                           "url":  "https://meli.la/32c6vC8",
-                                           "loja":  "Mercado Livre",
-                                           "titulo":  "Lixeira Inteligente Automática Cinza Universal Com Sensor Recarregável Earman Company Anti Odor 16l Recarregável Usb"
-                                       },
-    "impressora-multifuncional-cor":  {
-                                          "criado_em":  "2026-08-14 22:14",
-                                          "preco":  "Por R$ 1044.05",
-                                          "url":  "https://meli.la/2n4kJHJ",
-                                          "loja":  "Mercado Livre",
-                                          "titulo":  "Impressora multifuncional cor Epson EcoTank L3250"
-                                      },
-    "lixeira-sensor":  {
-                           "url":  "https://meli.la/32c6vC8",
-                           "titulo":  "Lixeira Inteligente Automática com Sensor Recarregável Anti Odor 16L",
-                           "preco_de":  120,
-                           "preco_por":  59,
-                           "loja":  "Mercado Livre",
-                           "criado_em":  "2026-08-14"
-                       },
-    "ar-condicionado-lg":  {
-                               "criado_em":  "2026-08-15 06:59",
-                               "preco":  "Por R$ 1994.05",
-                               "url":  "https://meli.la/2Zt525k",
-                               "loja":  "Mercado Livre",
-                               "titulo":  "Ar Condicionado LG Ai Smart Inverter Voice 9000 Btus Frio Branco"
-                           },
-    "mercado-livre":  {
-                          "url":  "https://meli.la/32c6vC8",
-                          "titulo":  "Lixeira Inteligente Automática com Sensor Recarregável 16L",
-                          "preco_de":  120,
-                          "preco_por":  59,
-                          "loja":  "Mercado Livre",
-                          "criado_em":  "2026-08-14"
-                      },
-    "epson-l3250":  {
-                        "criado_em":  "2026-08-14 22:14",
-                        "preco":  "Por R$ 1044.05",
-                        "url":  "https://meli.la/2n4kJHJ",
-                        "loja":  "Mercado Livre",
-                        "titulo":  "Impressora Multifuncional Epson EcoTank L3250"
-                    },
-    "mercusys-mc510-camera":  {
-                                  "criado_em":  "2026-08-14 20:41",
-                                  "preco":  "Por R$ 179.91",
-                                  "url":  "https://meli.la/161cnwd",
-                                  "loja":  "Mercado Livre",
-                                  "titulo":  "Mercusys MC510 Câmera Segurança Wifi 2K 360° Externo por TP-Link"
-                              },
-    "tenis-masculino-feminino":  {
-                                  "criado_em":  "2026-08-15 17:15",
-                                  "preco_de":  169.99,
-                                  "preco_por":  79.70,
-                                  "url":  "https://meli.la/2hM3zDH",
-                                  "loja":  "Pegar Promoção do Paizão",
-                                  "titulo":  "Tênis Masculino Feminino Kappa Park 2.0 Original"
-                              }
+  "lixeira-inteligente-automatica": {
+    "criado_em": "2026-08-14 20:24",
+    "preco": "De R$ 120 por R$ 59",
+    "url": "https://meli.la/32c6vC8",
+    "loja": "Mercado Livre",
+    "titulo": "Lixeira Inteligente Automática Cinza Universal Com Sensor Recarregável Earman Company Anti Odor 16l Recarregável Usb"
+  },
+  "impressora-multifuncional-cor": {
+    "criado_em": "2026-08-14 22:14",
+    "preco": "Por R$ 1044.05",
+    "url": "https://meli.la/2n4kJHJ",
+    "loja": "Mercado Livre",
+    "titulo": "Impressora multifuncional cor Epson EcoTank L3250"
+  },
+  "lixeira-sensor": {
+    "url": "https://meli.la/32c6vC8",
+    "titulo": "Lixeira Inteligente Automática com Sensor Recarregável Anti Odor 16L",
+    "preco_de": 120,
+    "preco_por": 59,
+    "loja": "Mercado Livre",
+    "criado_em": "2026-08-14"
+  },
+  "ar-condicionado-lg": {
+    "criado_em": "2026-08-15 06:59",
+    "preco": "Por R$ 1994.05",
+    "url": "https://meli.la/2Zt525k",
+    "loja": "Mercado Livre",
+    "titulo": "Ar Condicionado LG Ai Smart Inverter Voice 9000 Btus Frio Branco"
+  },
+  "mercado-livre": {
+    "url": "https://meli.la/32c6vC8",
+    "titulo": "Lixeira Inteligente Automática com Sensor Recarregável 16L",
+    "preco_de": 120,
+    "preco_por": 59,
+    "loja": "Mercado Livre",
+    "criado_em": "2026-08-14"
+  },
+  "epson-l3250": {
+    "criado_em": "2026-08-14 22:14",
+    "preco": "Por R$ 1044.05",
+    "url": "https://meli.la/2n4kJHJ",
+    "loja": "Mercado Livre",
+    "titulo": "Impressora Multifuncional Epson EcoTank L3250"
+  },
+  "mercusys-mc510-camera": {
+    "criado_em": "2026-08-14 20:41",
+    "preco": "Por R$ 179.91",
+    "url": "https://meli.la/161cnwd",
+    "loja": "Mercado Livre",
+    "titulo": "Mercusys MC510 Câmera Segurança Wifi 2K 360° Externo por TP-Link"
+  },
+  "tenis-masculino-feminino": {
+    "criado_em": "2026-08-15 17:15",
+    "preco_de": 169.99,
+    "preco_por": 79.7,
+    "url": "https://meli.la/2hM3zDH",
+    "loja": "Pegar Promoção do Paizão",
+    "titulo": "Tênis Masculino Feminino Kappa Park 2.0 Original"
+  },
+  "creatina-monohidratada-pura": {
+    "url": "https://meli.la/1aH4LHF",
+    "titulo": "Creatina Monohidratada Pura 500g Dark Lab Unidade",
+    "preco_de": "129,90",
+    "preco_por": "44,90",
+    "loja": "👨‍👧‍👦 Pegar Promoção do Paizão",
+    "criado_em": "2026-08-15 20:33"
+  }
 }
