@@ -29,15 +29,32 @@
     }
     if (!codigo) return;
 
-    const res = await fetch('/p/ofertas.json?v=' + Date.now());
-    if (res.ok) {
-      const ofertas = await res.json();
-      const oferta = ofertas[codigo];
-      const destino = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
-      if (destino) {
-        // Redireciona na hora antes de pintar a página
-        location.replace(destino);
+    let destino = null;
+
+    // 1. Tenta pegar de ofertas.json local do Netlify sem cache
+    try {
+      const res = await fetch('/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const ofertas = await res.json();
+        const oferta = ofertas[codigo];
+        destino = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
       }
+    } catch(e) {}
+
+    // 2. Se o Netlify ainda não atualizou, pega do GitHub Raw em tempo real
+    if (!destino) {
+      try {
+        const resGh = await fetch('https://raw.githubusercontent.com/MjuniorFacic/paizao-site/main/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
+        if (resGh.ok) {
+          const ofertasGh = await resGh.json();
+          const ofertaGh = ofertasGh[codigo];
+          destino = (typeof ofertaGh === 'string') ? ofertaGh : (ofertaGh && ofertaGh.url ? ofertaGh.url : null);
+        }
+      } catch(e) {}
+    }
+
+    if (destino) {
+      location.replace(destino);
     }
   } catch(e) {}
 })();
