@@ -263,6 +263,26 @@
     transform: scale(0.95);
   }
 
+  .btn-emoji-mini {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 16px;
+    padding: 3px 6px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: 0.15s;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-emoji-mini:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    transform: scale(1.15);
+  }
+
   .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -532,53 +552,49 @@
       </div>
     </div>
 
-    <div class="grid-2">
-      <div class="campo">
-        <label>Texto da Chamada do Link</label>
-        <input type="text" id="inputChamada" value="👨‍👧‍👦 Pegar Promoção do Paizão" placeholder="ex: 👨‍👧‍👦 Pegar Promoção do Paizão">
-        
-        <!-- EMOJIS DA CHAMADA DO LINK (PAIZÃO, ML, AMAZON, SHOPEE) -->
-        <div class="emoji-toolbar" style="margin-top:6px;padding:6px 8px">
-          <div class="emoji-toolbar-title" style="margin-bottom:4px">
-            <span>🎨 Emojis para o Link:</span>
-            <span class="dica-clique">Clique para inserir</span>
-          </div>
-          <div class="emoji-list" style="gap:4px">
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('👨‍👧‍👦')" title="Paizão Oficial">👨‍👧‍👦</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('👑')" title="Paizão / Rei">👑</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🧔')" title="Paizão">🧔</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('💛')" title="Mercado Livre Amarelo">💛</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🟡')" title="Mercado Livre Círculo">🟡</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🤝')" title="Mercado Livre Mãos">🤝</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('📦')" title="Amazon Pacote">📦</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🛒')" title="Amazon / Carrinho">🛒</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🟠')" title="Shopee Laranja">🟠</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🛍️')" title="Shopee Sacola">🛍️</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('👉')" title="Apontar">👉</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🔥')" title="Fogo">🔥</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('⚡')" title="Raio">⚡</button>
-            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🔗')" title="Link">🔗</button>
-          </div>
-        </div>
-
-        <div class="chips" style="margin-top:6px">
-          <span class="chip" onclick="setChamada('👨‍👧‍👦 Pegar Promoção do Paizão')">👨‍👧‍👦 Promoção do Paizão</span>
-          <span class="chip" onclick="setChamada('👑 Pegar Promoção do Paizão')">👑 Promoção do Paizão</span>
-          <span class="chip" onclick="setChamada('💛 Pegar no Mercado Livre')">💛 Mercado Livre</span>
-          <span class="chip" onclick="setChamada('📦 Pegar na Amazon')">📦 Amazon</span>
-          <span class="chip" onclick="setChamada('🟠 Pegar na Shopee')">🟠 Shopee</span>
-          <span class="chip" onclick="setChamada('pegar promoção')">pegar promoção</span>
-        </div>
+    <!-- CHAMADA DO LINK COM EMOJIS EM UMA LINHA ÚNICA -->
+    <div class="campo">
+      <label>4. Texto da Chamada do Link</label>
+      <input type="text" id="inputChamada" value="👨‍👧‍👦 Pegar Promoção do Paizão" placeholder="ex: 👨‍👧‍👦 Pegar Promoção do Paizão">
+      
+      <!-- BARRA DE EMOJIS EM UMA LINHA ÚNICA -->
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;overflow-x:auto;padding-bottom:2px">
+        <span style="font-size:11px;font-weight:700;color:#64748b;white-space:nowrap">Emojis:</span>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('👨‍👧‍👦')" title="Paizão Oficial">👨‍👧‍👦</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('👑')" title="Rei / Paizão">👑</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🧔')" title="Paizão">🧔</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('💛')" title="Mercado Livre">💛</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🟡')" title="Mercado Livre">🟡</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🤝')" title="Mercado Livre">🤝</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('📦')" title="Amazon">📦</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🛒')" title="Carrinho">🛒</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🟠')" title="Shopee">🟠</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🛍️')" title="Shopee">🛍️</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('👉')" title="Apontar">👉</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🔥')" title="Fogo">🔥</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('⚡')" title="Raio">⚡</button>
+        <button type="button" class="btn-emoji-mini" onclick="inserirEmojiChamada('🔗')" title="Link">🔗</button>
       </div>
+
+      <div class="chips" style="margin-top:6px">
+        <span class="chip" onclick="setChamada('👨‍👧‍👦 Pegar Promoção do Paizão')">👨‍👧‍👦 Promoção do Paizão</span>
+        <span class="chip" onclick="setChamada('👑 Pegar Promoção do Paizão')">👑 Promoção do Paizão</span>
+        <span class="chip" onclick="setChamada('💛 Pegar no Mercado Livre')">💛 Mercado Livre</span>
+        <span class="chip" onclick="setChamada('📦 Pegar na Amazon')">📦 Amazon</span>
+        <span class="chip" onclick="setChamada('🟠 Pegar na Shopee')">🟠 Shopee</span>
+        <span class="chip" onclick="setChamada('pegar promoção')">pegar promoção</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
       <div class="campo">
         <label>Código da Oferta (/p/...)</label>
         <input type="text" id="inputSlug" value="ar-condicionado-lg" placeholder="ex: ar-condicionado-lg">
       </div>
-    </div>
-
-    <div class="campo">
-      <label>Foto do Produto (URL da Imagem)</label>
-      <input type="text" id="inputImg" value="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" placeholder="https://...">
+      <div class="campo">
+        <label>Foto do Produto (URL da Imagem)</label>
+        <input type="text" id="inputImg" value="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" placeholder="https://...">
+      </div>
     </div>
   </div>
 
@@ -997,6 +1013,11 @@ async function buscarDadosOferta() {
   btn.textContent = '⏳ Buscando...';
   status.textContent = 'Buscando dados da oferta...';
   status.style.color = '#0284c7';
+
+  // Limpa valores anteriores para evitar manter preços de produtos antigos
+  $('#inputPrecoDe').value = '';
+  $('#inputPrecoPor').value = '';
+  $('#inputCupom').value = '';
 
   let tituloExtraido = '';
   let imagemExtraida = '';
