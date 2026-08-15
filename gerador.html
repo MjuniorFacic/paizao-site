@@ -402,6 +402,16 @@
     text-decoration: none;
   }
 
+  .btn.disabled,
+  .btn[disabled] {
+    opacity: 0.35 !important;
+    pointer-events: none !important;
+    filter: grayscale(0.6);
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
   .btn-salvar {
     background: var(--navy);
     color: var(--amarelo);
@@ -410,6 +420,11 @@
     font-size: 15px;
   }
   .btn-salvar:hover { background: var(--navy-2); transform: translateY(-1px); }
+  .btn-salvar.sucesso {
+    background: #059669 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(5,150,105,0.3) !important;
+  }
 
   .btn-secundario {
     background: #f1f5f9;
@@ -418,10 +433,19 @@
   }
   .btn-secundario:hover { background: #e2e8f0; }
 
+  .btn-testar {
+    background: #0284c7;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(2,132,199,0.25);
+  }
+  .btn-testar:hover { background: #0369a1; transform: translateY(-1px); }
+
   .btn-copiar {
     background: var(--whats-green);
     color: #fff;
+    grid-column: span 2;
     box-shadow: 0 4px 14px rgba(37,211,102,0.28);
+    font-size: 15px;
   }
   .btn-copiar:hover { background: #20bd5a; transform: translateY(-1px); }
 
@@ -624,13 +648,16 @@
 
     <div class="acoes">
       <button class="btn btn-salvar" id="btnSalvarPublicar" onclick="salvarEPublicar()" style="grid-column:span 2;padding:15px">
-        🚀 1º Passo: Salvar & Publicar no Site (Netlify)
+        🚀 1º Passo: Salvar & Publicar no Site
       </button>
-      <a id="btnBaixarFoto" class="btn btn-secundario" href="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" target="_blank" download="produto.jpg">
+      <a id="btnBaixarFoto" class="btn btn-secundario disabled" href="#" target="_blank" download="produto.jpg">
         📸 2º Passo: Baixar Imagem
       </a>
-      <button class="btn btn-copiar" onclick="copiarPost()">
-        📋 3º Passo: Copiar Post
+      <a id="btnTestarLink" class="btn btn-testar disabled" href="#" target="_blank" rel="noopener">
+        🧪 3º Passo: Testar Link ↗
+      </a>
+      <button class="btn btn-copiar disabled" id="btnCopiarPost" onclick="copiarPost()">
+        📋 4º Passo: Copiar Post para WhatsApp
       </button>
     </div>
   </div>
@@ -1021,6 +1048,8 @@ async function buscarDadosOferta() {
   const url = $('#inputUrl').value.trim();
   if (!url) return;
 
+  desabilitarPassos();
+
   const btn = $('#btnBuscar');
   const status = $('#statusBar');
   btn.classList.add('loading');
@@ -1206,6 +1235,45 @@ async function salvarEPublicar() {
   btn.textContent = '⏳ Publicando no Netlify...';
   btn.style.opacity = '0.7';
 
+function desabilitarPassos() {
+  $('#btnBaixarFoto').classList.add('disabled');
+  $('#btnTestarLink').classList.add('disabled');
+  $('#btnTestarLink').removeAttribute('href');
+  $('#btnCopiarPost').classList.add('disabled');
+  $('#btnSalvarPublicar').classList.remove('sucesso');
+  $('#btnSalvarPublicar').textContent = '🚀 1º Passo: Salvar & Publicar no Site';
+  $('#btnSalvarPublicar').style.opacity = '1';
+}
+
+function habilitarPassos(slug, imgUrl) {
+  $('#btnBaixarFoto').classList.remove('disabled');
+  if (imgUrl) $('#btnBaixarFoto').href = imgUrl;
+  $('#btnTestarLink').classList.remove('disabled');
+  $('#btnTestarLink').href = `https://paizaodosdescontos.com.br/p/${slug}`;
+  $('#btnCopiarPost').classList.remove('disabled');
+  $('#btnSalvarPublicar').classList.add('sucesso');
+  $('#btnSalvarPublicar').innerHTML = '✅ 1º Passo: Publicado com Sucesso!';
+  $('#btnSalvarPublicar').style.opacity = '1';
+}
+
+async function salvarEPublicar() {
+  const btn = $('#btnSalvarPublicar');
+  const slug = $('#inputSlug').value.trim();
+  const url = $('#inputUrl').value.trim();
+  const titulo = $('#inputTitulo').value.trim();
+  const por = $('#inputPrecoPor').value.trim();
+  const de = $('#inputPrecoDe').value.trim();
+  const loja = $('#inputChamada').value.trim();
+  const imgUrl = $('#inputImg').value.trim();
+
+  if (!slug || !url) {
+    toast('⚠️ Preencha o link e o código da oferta!');
+    return;
+  }
+
+  btn.textContent = '⏳ Gravando no GitHub...';
+  btn.style.opacity = '0.7';
+
   // 1. Salva no navegador (localStorage)
   let salvas = JSON.parse(localStorage.getItem('paizao_ofertas') || '{}');
   salvas[slug] = { url, titulo, preco_de: de, preco_por: por, salvo_em: new Date().toISOString() };
@@ -1263,26 +1331,24 @@ async function salvarEPublicar() {
     });
 
     if (resPut.ok) {
-      toast(`🚀 Publicado com sucesso! Link ativo no Netlify em 10s!`);
-      copiarPost();
+      habilitarPassos(slug, imgUrl);
+      toast(`🚀 Publicado com sucesso! Agora teste o link no 3º Passo antes de postar!`);
     } else {
+      desabilitarPassos();
       console.error('GitHub PUT error:', resPut.status);
-      alert(`Atenção: O GitHub retornou erro ${resPut.status} ao salvar a oferta. Recarregue a página.`);
-      copiarPost();
+      alert(`Atenção: O GitHub retornou erro ${resPut.status} ao salvar a oferta. Tente novamente.`);
     }
   } catch (err) {
+    desabilitarPassos();
     console.error(err);
     alert('Erro de conexão ao salvar no GitHub: ' + err.message);
-    copiarPost();
-  } finally {
-    btn.textContent = '🚀 1º Passo: Salvar & Publicar no Site (Netlify)';
-    btn.style.opacity = '1';
   }
 }
 
 // Inicializa a toolbar de emojis dinâmicos
 renderizarToolbarEmojis('clima');
 atualizarPreview();
+desabilitarPassos();
 </script>
 </body>
 </html>
