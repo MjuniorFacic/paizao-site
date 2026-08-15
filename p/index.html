@@ -17,7 +17,35 @@
 <link rel="icon" href="../assets/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/favicon.png">
 
+<!-- REDIRECIONAMENTO ULTRA-INSTANTÂNEO (Executa no Head antes de desenhar a tela) -->
+<script>
+(async function() {
+  try {
+    const params = new URLSearchParams(location.search);
+    let codigo = (params.get('id') || params.get('codigo') || '').trim().toLowerCase();
+    if (!codigo && location.pathname.includes('/p/')){
+      const parte = location.pathname.split('/p/')[1];
+      if (parte) codigo = decodeURIComponent(parte).split('/')[0].trim().toLowerCase();
+    }
+    if (!codigo) return;
+
+    const res = await fetch('/p/ofertas.json?v=' + Date.now());
+    if (res.ok) {
+      const ofertas = await res.json();
+      const oferta = ofertas[codigo];
+      const destino = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
+      if (destino) {
+        // Redireciona na hora antes de pintar a página
+        location.replace(destino);
+      }
+    }
+  } catch(e) {}
+})();
+</script>
+
 <style>
+  body { opacity: 0; transition: opacity 0.15s; }
+  body.visivel { opacity: 1; }
   /* ===== PALETA OFICIAL — consistente com a página de grupos ===== */
   :root{
     --navy:#002456;        /* azul da marca            */
@@ -178,11 +206,11 @@ async function processar(){
   const urlFinal = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
 
   if (urlFinal){
-    // Redirecionamento nativo e instantâneo (sem delay e sem bloqueio de pop-up)
     window.location.replace(urlFinal);
     return;
   } else {
     /* ---------- OFERTA ENCERRADA / NÃO ENCONTRADA ---------- */
+    document.body.classList.add('visivel');
     const msg = codigo
       ? 'Essa oferta não existe mais ou o link foi atualizado.'
       : 'Nenhuma oferta foi informada no link.';
