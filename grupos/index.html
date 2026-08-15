@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grupos de Ofertas | Paizão dos Descontos</title>
+<meta name="description" content="Entre nos grupos do Paizão dos Descontos e receba as melhores promoções, cupons e achados do dia direto no seu WhatsApp. Grátis.">
+
+<!-- ============ OPEN GRAPH (preview ao compartilhar) ============ -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Paizão dos Descontos — Grupos de Ofertas">
+<meta property="og:description" content="Promoções, cupons e achados do dia direto no seu WhatsApp. Entrada grátis.">
+<meta property="og:image" content="https://paizaodosdescontos.com.br/assets/capa.jpg">
+<meta property="og:url" content="https://paizaodosdescontos.com.br/grupos/">
+<meta name="theme-color" content="#002456">
+<link rel="icon" href="../assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/favicon.png">
+
+<style>
+  /* ===== PALETA OFICIAL — O Paizão Fábrica ===== */
+  :root{
+    --navy:#002456;        /* azul da marca            */
+    --navy-2:#0A3374;      /* azul claro (gradiente)   */
+    --amarelo:#FECB02;     /* amarelo da marca         */
+    --amarelo-2:#FFDC57;   /* amarelo claro            */
+    --whats:#25D366;       /* verde só do botão WhatsApp */
+
+    --bg:#f5f6f9;
+    --card:#ffffff;
+    --txt:#111c33;
+    --txt2:#6d7793;
+    --borda:#e2e6ef;
+    --raio:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--txt); line-height:1.5;
+    padding-bottom:88px;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:linear-gradient(165deg,var(--navy-2) 0%,var(--navy) 62%,#001736 100%);
+    color:#fff; padding:18px 0 30px; text-align:center;
+    border-radius:0 0 26px 26px;
+  }
+  /* a arte da marca É o banner: ocupa a largura toda do topo */
+  .banner{
+    width:min(84vw,340px);aspect-ratio:1/1;border-radius:50%;
+    margin:0 auto;overflow:hidden;
+    box-shadow:0 14px 40px rgba(0,0,0,.42);
+  }
+  .banner img{width:100%;height:100%;object-fit:cover;display:block}
+
+  /* título e slogan já estão dentro da arte — mantidos só para SEO/leitores de tela */
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  header p{font-size:13.5px;opacity:.88;margin-top:14px}
+  .selo{
+    display:inline-flex;gap:6px;align-items:center;
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+    padding:5px 13px;border-radius:99px;font-size:12.5px;font-weight:600;margin-top:14px;
+  }
+  .pulse{width:8px;height:8px;border-radius:50%;background:var(--amarelo);
+    animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+
+  /* ---------- CTA PRINCIPAL ---------- */
+  .cta-topo{margin:16px auto 0;position:relative;z-index:2}
+  .btn-principal{
+    display:block;width:100%;background:var(--amarelo);color:var(--navy);
+    text-align:center;font-size:17px;font-weight:800;
+    padding:17px;border:none;border-radius:var(--raio);cursor:pointer;
+    text-decoration:none;box-shadow:0 8px 22px rgba(0,36,86,.28);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn-principal:active{transform:scale(.975);box-shadow:0 4px 12px rgba(0,36,86,.2)}
+  .btn-principal small{display:block;font-weight:600;font-size:12px;opacity:.75;margin-top:3px}
+
+  /* ---------- BENEFÍCIOS ---------- */
+  .beneficios{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:18px;
+  }
+  .ben{
+    background:var(--card);border:1px solid var(--borda);border-radius:12px;
+    padding:11px 4px;text-align:center;
+  }
+  .ben b{display:block;font-size:19px;line-height:1.2}
+  .ben span{font-size:10.5px;color:var(--txt2);font-weight:600}
+
+  /* ---------- SEÇÃO ---------- */
+  .titulo-secao{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin:26px 0 12px;
+  }
+  .titulo-secao h2{font-size:16px;font-weight:800}
+  .titulo-secao span{font-size:12.5px;color:var(--txt2);font-weight:600}
+
+  /* ---------- CARD DE GRUPO ---------- */
+  .grupo{
+    background:var(--card);border:1px solid var(--borda);border-radius:var(--raio);
+    padding:14px;margin-bottom:10px;display:flex;gap:13px;align-items:center;
+    text-decoration:none;color:inherit;transition:border-color .15s, transform .12s;
+  }
+  .grupo:active{transform:scale(.99)}
+  .grupo:not(.lotado):hover{border-color:var(--amarelo)}
+  .ico{
+    width:46px;height:46px;flex:0 0 46px;border-radius:13px;
+    background:#eaeefa;color:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;font-weight:800;
+  }
+  .info{flex:1;min-width:0}
+  .info h3{font-size:14.5px;font-weight:700;margin-bottom:2px}
+  .barra{height:6px;background:#e9edf5;border-radius:99px;overflow:hidden;margin:7px 0 5px}
+  .barra i{display:block;height:100%;border-radius:99px;background:var(--navy);transition:width .6s ease}
+  .vagas{font-size:11.5px;color:var(--txt2);font-weight:600}
+  .vagas b{color:var(--navy)}
+  .entrar{
+    flex:0 0 auto;background:var(--amarelo);color:var(--navy);
+    font-size:12.5px;font-weight:800;padding:9px 15px;border-radius:10px;
+  }
+
+  /* lotado */
+  .grupo.lotado{opacity:.55}
+  .grupo.lotado .ico{background:#f1f1f1;color:#9aa5a0}
+  .grupo.lotado .barra i{background:#c8d0cc}
+  .grupo.lotado .entrar{background:#eceeed;color:#8d9793}
+  .grupo.lotado .vagas b{color:#8d9793}
+
+  /* quase lotado */
+  .grupo.quase .barra i{background:var(--amarelo)}
+  .destaque.quase .barra i{background:var(--amarelo)}
+  .grupo.quase .vagas b{color:#c78500}
+
+  /* ---------- CARD ÚNICO (modo destaque) ---------- */
+  .destaque{
+    background:var(--card);border:2px solid var(--amarelo);border-radius:var(--raio);
+    padding:20px;text-align:center;display:block;text-decoration:none;color:inherit;
+    box-shadow:0 6px 24px rgba(254,203,2,.2);position:relative;overflow:hidden;
+  }
+  .destaque::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--amarelo);
+  }
+  .destaque .tag-ativo{
+    display:inline-flex;gap:6px;align-items:center;background:var(--navy);color:var(--amarelo);
+    font-size:11.5px;font-weight:800;padding:5px 12px;border-radius:99px;
+    letter-spacing:.4px;text-transform:uppercase;margin-bottom:12px;
+  }
+  .destaque h3{font-size:22px;font-weight:800;letter-spacing:-.5px}
+  .destaque .sub{font-size:13px;color:var(--txt2);margin-top:3px}
+  .destaque .barra{margin:16px 0 8px;height:9px}
+  .destaque .vagas{font-size:13.5px}
+  .destaque .btn-entrar{
+    display:block;margin-top:16px;background:var(--amarelo);color:var(--navy);
+    font-size:16.5px;font-weight:800;padding:15px;border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,36,86,.26);
+  }
+  .lotados-info{
+    text-align:center;font-size:12px;color:var(--txt2);margin-top:12px;font-weight:600;
+  }
+  .lotados-info b{color:var(--navy)}
+
+  /* ---------- REGRAS / FAQ ---------- */
+  .box{
+    background:var(--card);border:1px solid var(--borda);border-radius:var(--raio);
+    padding:16px;margin-top:12px;
+  }
+  .box h3{font-size:14px;font-weight:800;margin-bottom:9px}
+  .box ul{list-style:none;display:grid;gap:7px}
+  .box li{font-size:13.2px;color:#3c4763;padding-left:22px;position:relative}
+  .box li::before{content:"✓";position:absolute;left:0;color:var(--navy);font-weight:800}
+  .box li.nao::before{content:"✕";color:#d94a4a}
+
+  details{border-top:1px solid var(--borda);padding:11px 0}
+  details:first-of-type{border-top:none;padding-top:0}
+  summary{font-size:13.5px;font-weight:700;cursor:pointer;list-style:none;
+    display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-size:18px;color:var(--txt2);font-weight:400}
+  details[open] summary::after{content:"−"}
+  details p{font-size:13px;color:var(--txt2);margin-top:7px}
+
+  /* ---------- RODAPÉ ---------- */
+  footer{text-align:center;padding:26px 16px 10px;font-size:11.5px;color:var(--txt2);line-height:1.6}
+  footer a{color:var(--navy);text-decoration:none;font-weight:600}
+
+  /* ---------- BARRA FIXA ---------- */
+  .fixa{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+    border-top:1px solid var(--borda);padding:11px 16px calc(11px + env(safe-area-inset-bottom));
+  }
+  .fixa .wrap{padding:0}
+
+  .toast{
+    position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(14px);
+    background:var(--navy);color:#fff;font-size:13px;font-weight:600;
+    padding:11px 18px;border-radius:99px;opacity:0;pointer-events:none;
+    transition:.28s;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.2)
+  }
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="banner">
+      <img src="../assets/logo.png" width="560" height="560"
+           alt="Paizão dos Descontos — O Paizão achou, você economiza! Ofertas, cupons, achadinhos e preços baixos.">
+    </div>
+    <h1 class="sr">Paizão dos Descontos — O Paizão achou, você economiza!</h1>
+    <p>Entre no grupo e receba as ofertas no seu WhatsApp</p>
+    <div class="selo"><span class="pulse"></span> <span id="online">— pessoas nos grupos</span></div>
+  </div>
+</header>
+
+<div class="wrap cta-topo">
+  <a href="#" class="btn-principal" id="btnTopo">
+    Entrar no grupo agora
+    <small>Vaga liberada • 100% grátis</small>
+  </a>
+
+  <!-- Os 4 pilares (Ofertas · Cupons · Achadinhos · Preços baixos) já aparecem
+       na arte do topo. Repetir aqui só polui — por isso foram removidos. -->
+
+  <div class="titulo-secao">
+    <h2 id="tituloSecao">Grupo disponível</h2>
+    <span id="resumo"></span>
+  </div>
+
+  <div id="lista"></div>
+  <div class="lotados-info" id="lotadosInfo"></div>
+
+  <div class="box">
+    <h3>Regras dos grupos</h3>
+    <ul>
+      <li>Só admins postam — sem bagunça e sem spam</li>
+      <li>Compra feita direto na loja oficial (Mercado Livre, Shopee, Amazon...)</li>
+      <li>Preços mudam rápido: se gostou, garanta na hora</li>
+      <li class="nao">Não pedimos dados, senha, PIX ou pagamento</li>
+      <li class="nao">Não vendemos nada — só indicamos promoções</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <h3>Dúvidas frequentes</h3>
+    <details open>
+      <summary>É pago?</summary>
+      <p>Não. A entrada é 100% gratuita e você sai quando quiser.</p>
+    </details>
+    <details>
+      <summary>Meu número fica visível?</summary>
+      <p>Como em qualquer grupo do WhatsApp, os participantes conseguem ver a lista de membros. Não usamos seu número para nada além do grupo, e você pode sair quando quiser.</p>
+    </details>
+    <details>
+      <summary>Por que só aparece um grupo?</summary>
+      <p>As ofertas postadas são exatamente as mesmas em todos os grupos. Mostramos apenas o que está com vaga aberta no momento — assim você entra direto, sem cair num grupo cheio.</p>
+    </details>
+    <details>
+      <summary>Como vocês ganham dinheiro?</summary>
+      <p>Recebemos uma pequena comissão das lojas quando você compra pelos nossos links. O preço para você é exatamente o mesmo.</p>
+    </details>
+    <details>
+      <summary>Deu erro ao entrar / grupo cheio</summary>
+      <p>Significa que o grupo encheu nos últimos minutos. Atualize esta página: o próximo grupo com vaga aparece automaticamente.</p>
+    </details>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <strong>👨‍👧‍👦 PAIZÃO DOS DESCONTOS</strong><br>
+    Um projeto de <a href="https://www.instagram.com/o_paizao_fabrica/" target="_blank" rel="noopener">O Paizão Fábrica</a><br><br>
+    Participamos de programas de afiliados. Preços e disponibilidade sujeitos a alteração pelas lojas.<br>
+    <a href="https://www.instagram.com/o_paizao_fabrica/" target="_blank" rel="noopener">@o_paizao_fabrica</a>
+  </div>
+</footer>
+
+<div class="fixa">
+  <div class="wrap">
+    <a href="#" class="btn-principal" id="btnFixo">Entrar no grupo com vaga →</a>
+  </div>
+</div>
+
+<div class="toast" id="toast">Abrindo o WhatsApp...</div>
+
+<script>
+/* ==================================================================
+   CONFIGURAÇÃO — é só aqui que você mexe.
+
+   MODO_UNICO = true   → mostra SÓ o grupo aberto no momento (padrão,
+                         igual ao achadosdetenis). Converte melhor:
+                         a pessoa não escolhe, não hesita, só entra.
+   MODO_UNICO = false  → mostra a lista completa com todos os grupos.
+
+   Na lista GRUPOS:
+   - link:     o convite (Grupo → Convidar via link → Copiar)
+   - membros:  quantas pessoas já estão no grupo (atualize de vez em quando)
+   - limite:   capacidade do grupo (o WhatsApp permite até 1024)
+
+   Grupo cheio some sozinho e a página passa pro próximo da fila.
+   Ordem da lista = ordem de abertura (do mais antigo pro mais novo).
+   ================================================================== */
+const MODO_UNICO = true;
+
+const GRUPOS = [
+  { nome: 'Paizão Ofertas #01', link: 'https://chat.whatsapp.com/COLE_SEU_LINK_1', membros: 1, limite: 1024 }
+];
+/* ================================================================== */
+
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString('pt-BR');
+
+const temVaga = g => g.membros < g.limite;
+const pctDe   = g => Math.min(100, Math.round(g.membros / g.limite * 100));
+const vagasDe = g => Math.max(0, g.limite - g.membros);
+
+// primeiro grupo com vaga, seguindo a ordem de abertura
+const atual   = GRUPOS.find(temVaga) || null;
+const destino = atual ? atual.link : null;
+const lotados = GRUPOS.filter(g => !temVaga(g)).length;
+
+// header: total de membros
+$('#online').textContent = fmt(GRUPOS.reduce((s,g) => s + g.membros, 0)) + ' pessoas nos grupos';
+
+/* ---------- MODO ÚNICO: só o grupo aberto ---------- */
+if (MODO_UNICO){
+  $('#tituloSecao').textContent = 'Grupo disponível';
+  $('#resumo').textContent = atual ? 'atualizado agora' : '';
+
+  if (atual){
+    const pct = pctDe(atual), vagas = vagasDe(atual);
+    $('#lista').innerHTML = `
+      <a class="destaque" href="${atual.link}" target="_blank" rel="noopener">
+        <span class="tag-ativo"><span class="pulse"></span> Vaga aberta</span>
+        <h3>${atual.nome}</h3>
+        <div class="sub">${fmt(atual.membros)} membros · ofertas todo dia</div>
+        <div class="barra"><i style="width:${pct}%"></i></div>
+        <div class="vagas">Restam <b>${fmt(vagas)} vagas</b> neste grupo</div>
+        <span class="btn-entrar">Entrar no grupo →</span>
+      </a>`;
+    $('#lotadosInfo').innerHTML = lotados
+      ? `Os <b>${lotados} grupos anteriores</b> já estão lotados. Este é o grupo ativo no momento.`
+      : '';
+  } else {
+    $('#lista').innerHTML = `
+      <div class="destaque" style="border-color:var(--borda);box-shadow:none">
+        <h3 style="color:var(--txt2)">Todos os grupos lotados</h3>
+        <div class="sub">Estamos abrindo um grupo novo. Volte em algumas horas.</div>
+      </div>`;
+    $('#lotadosInfo').textContent = '';
+  }
+
+/* ---------- MODO LISTA: todos os grupos ---------- */
+} else {
+  const ordenados = [...GRUPOS].sort((a,b) => {
+    if (temVaga(a) !== temVaga(b)) return temVaga(a) ? -1 : 1;
+    return b.membros - a.membros;
+  });
+  const disponiveis = ordenados.filter(temVaga);
+
+  $('#tituloSecao').textContent = 'Escolha um grupo';
+  $('#resumo').textContent = disponiveis.length
+    ? disponiveis.length + ' com vaga'
+    : 'todos lotados';
+
+  $('#lista').innerHTML = ordenados.map((g, i) => {
+    const lotado = !temVaga(g);
+    const pct = pctDe(g), vagas = vagasDe(g);
+    const cls = lotado ? 'lotado' : (pct >= 85 ? 'quase' : '');
+    const txt = lotado
+        ? '<b>Grupo cheio</b> · ' + fmt(g.limite) + ' membros'
+        : 'Restam <b>' + fmt(vagas) + ' vagas</b> · ' + pct + '% cheio';
+
+    return `<a class="grupo ${cls}" href="${lotado ? '#' : g.link}"
+               ${lotado ? 'onclick="return false"' : 'target="_blank" rel="noopener"'}>
+        <div class="ico">${lotado ? '🔒' : String(i+1).padStart(2,'0')}</div>
+        <div class="info">
+          <h3>${g.nome}</h3>
+          <div class="barra"><i style="width:${pct}%"></i></div>
+          <div class="vagas">${txt}</div>
+        </div>
+        <div class="entrar">${lotado ? 'LOTADO' : 'Entrar'}</div>
+      </a>`;
+  }).join('');
+  $('#lotadosInfo').textContent = '';
+}
+
+// botões principais → primeiro grupo com vaga
+function irParaGrupo(e){
+  e.preventDefault();
+  if (!destino) { toast('Todos os grupos estão cheios no momento 😥'); return; }
+  toast('Abrindo o WhatsApp...');
+  setTimeout(() => window.open(destino, '_blank', 'noopener'), 350);
+}
+$('#btnTopo').addEventListener('click', irParaGrupo);
+$('#btnFixo').addEventListener('click', irParaGrupo);
+
+let t;
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(t); t = setTimeout(() => el.classList.remove('on'), 2200);
+}
+
+// se não houver nenhuma vaga, ajusta o texto dos botões
+if (!destino){
+  $('#btnTopo').innerHTML = 'Grupos lotados<small>Novos grupos em breve</small>';
+  $('#btnFixo').textContent = 'Todos os grupos estão cheios';
+  [$('#btnTopo'), $('#btnFixo')].forEach(b => b.style.filter = 'grayscale(1)');
+}
+</script>
+</body>
+</html>

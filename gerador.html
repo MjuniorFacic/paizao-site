@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Posts para WhatsApp | Paizão dos Descontos</title>
+<link rel="icon" href="assets/favicon.png" type="image/png">
+
+<style>
+  :root {
+    --navy: #002456;
+    --navy-2: #0A3374;
+    --amarelo: #FECB02;
+    --amarelo-2: #FFDC57;
+    --whats-bg: #EFEAE2;
+    --whats-msg: #FFFFFF;
+    --whats-green: #25D366;
+    --whats-darkgreen: #075E54;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --txt: #111c33;
+    --txt2: #64748b;
+    --borda: #e2e8f0;
+    --raio: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+
+  body {
+    background: var(--bg);
+    color: var(--txt);
+    line-height: 1.5;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--navy-2) 0%, var(--navy) 100%);
+    color: #fff;
+    padding: 22px 20px;
+    box-shadow: 0 4px 20px rgba(0,36,86,0.15);
+  }
+
+  .header-wrap {
+    max-width: 1150px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-area img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--amarelo);
+  }
+
+  .logo-area h1 {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .logo-area p {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
+  .nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.12);
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: 0.2s;
+  }
+  .nav-links a:hover {
+    background: var(--amarelo);
+    color: var(--navy);
+  }
+
+  .container {
+    max-width: 1150px;
+    margin: 28px auto 0;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 28px;
+  }
+
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  .card-form, .card-preview {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  }
+
+  .card-form h2, .card-preview h2 {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--navy);
+  }
+
+  .campo {
+    margin-bottom: 18px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .campo-input-btn {
+    display: flex;
+    gap: 8px;
+  }
+
+  .campo input, .campo select, .campo textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--borda);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--txt);
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fff;
+  }
+
+  .campo input:focus, .campo select:focus, .campo textarea:focus {
+    border-color: var(--navy);
+  }
+
+  .btn-buscar {
+    background: var(--navy);
+    color: var(--amarelo);
+    border: none;
+    border-radius: 10px;
+    padding: 0 18px;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+  }
+  .btn-buscar:hover { background: var(--navy-2); }
+  .btn-buscar.loading { opacity: 0.7; pointer-events: none; }
+
+  /* BARRA DE EMOJIS DINÂMICA / FILTRO INTELIGENTE */
+  .emoji-toolbar {
+    margin-top: 8px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+  }
+
+  .emoji-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .categoria-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 99px;
+    border: 1px solid #bae6fd;
+  }
+
+  .categoria-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .tab-cat {
+    font-size: 10.5px;
+    background: #ffffff;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 3px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.15s;
+  }
+  .tab-cat:hover {
+    background: #f1f5f9;
+    color: var(--navy);
+  }
+  .tab-cat.ativa {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+  }
+
+  .emoji-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn-emoji {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.15s, border-color 0.15s;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .btn-emoji:hover {
+    background: var(--amarelo);
+    border-color: #d97706;
+    transform: translateY(-2px) scale(1.18);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .btn-emoji:active {
+    transform: scale(0.95);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .chip {
+    font-size: 11px;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 5px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    transition: 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chip:hover {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+  }
+
+  /* PREVIEW WHATSAPP */
+  .whats-container {
+    background: var(--whats-bg);
+    background-image: radial-gradient(#d1d7db 1px, transparent 1px);
+    background-size: 16px 16px;
+    border-radius: 14px;
+    padding: 20px;
+    min-height: 490px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .whats-bubble {
+    background: var(--whats-msg);
+    border-radius: 10px 10px 10px 0;
+    max-width: 380px;
+    box-shadow: 0 1.5px 3px rgba(0,0,0,0.14);
+    overflow: hidden;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+
+  .whats-bubble .foto-preview {
+    width: 100%;
+    height: 270px;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .whats-bubble .foto-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .whats-bubble .legenda {
+    padding: 12px 14px;
+    font-size: 13.8px;
+    color: #111b21;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.45;
+  }
+
+  .whats-bubble .hora {
+    text-align: right;
+    font-size: 11px;
+    color: #667781;
+    padding: 0 10px 8px;
+  }
+
+  /* BOTÕES DE AÇÃO */
+  .acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    transition: 0.15s;
+    text-decoration: none;
+  }
+
+  .btn-copiar {
+    background: var(--whats-green);
+    color: #fff;
+    grid-column: span 2;
+    box-shadow: 0 4px 14px rgba(37,211,102,0.3);
+  }
+  .btn-copiar:hover { background: #20bd5a; transform: translateY(-1px); }
+
+  .btn-secundario {
+    background: #e2e8f0;
+    color: #334155;
+  }
+  .btn-secundario:hover { background: #cbd5e1; }
+
+  .btn-salvar {
+    background: var(--navy);
+    color: var(--amarelo);
+  }
+  .btn-salvar:hover { background: var(--navy-2); }
+
+  /* STATUS BAR */
+  .status-bar {
+    font-size: 12.5px;
+    color: #059669;
+    font-weight: 600;
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(50px);
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-wrap">
+    <div class="logo-area">
+      <img src="assets/logo.png" alt="Paizão dos Descontos">
+      <div>
+        <h1>Gerador de Posts para WhatsApp</h1>
+        <p>Formato oficial de alta conversão do Paizão dos Descontos</p>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="grupos/" target="_blank">Ver Grupos ↗</a>
+      <a href="p/index.html" target="_blank">Ver /p/ ↗</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- FORMULÁRIO -->
+  <div class="card-form">
+    <h2>⚙️ Dados da Oferta</h2>
+
+    <div class="campo">
+      <label>1. Cole o Link do Mercado Livre / Afiliado</label>
+      <div class="campo-input-btn">
+        <input type="text" id="inputUrl" placeholder="Cole aqui o link (ex: https://meli.la/2Zt525k)" value="https://meli.la/2Zt525k">
+        <button type="button" class="btn-buscar" id="btnBuscar" onclick="buscarDadosOferta()">
+          <span>🔍 Buscar</span>
+        </button>
+      </div>
+      <div class="status-bar" id="statusBar"></div>
+    </div>
+
+    <!-- HEADLINE COM FILTRO INTELIGENTE E DINÂMICO DE EMOJIS -->
+    <div class="campo">
+      <label>2. Headline (Benefício em Caixa Alta)</label>
+      <input type="text" id="inputHeadline" value="❄️ CONFORTO E CLIMATIZAÇÃO PARA SUA CASA">
+
+      <!-- BARRA INTELIGENTE DE EMOJIS -->
+      <div class="emoji-toolbar">
+        <div class="emoji-header">
+          <div class="categoria-badge" id="badgeCategoria">
+            <span>🎯 Sugeridos para:</span> <b id="nomeCategoria">Ar Condicionado & Clima</b>
+          </div>
+          <span style="font-size:11px;color:#0284c7;font-weight:600">Toque para inserir na Headline 👇</span>
+        </div>
+
+        <!-- ABAS RÁPIDAS CASO QUEIRA MUDAR O TEMA -->
+        <div class="categoria-tabs" id="catTabs">
+          <button type="button" class="tab-cat ativa" onclick="selecionarAba('auto')">🎯 Automático</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('clima')">❄️ Ar & Clima</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('tenis')">👟 Tênis & Moda</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('cozinha')">🍳 Cozinha</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('tech')">📱 Tech & Games</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('impressora')">🖨️ Impressoras</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('casa')">🏠 Casa & Limpeza</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('geral')">🔥 Promoções</button>
+        </div>
+
+        <!-- LISTA DINÂMICA DE BOTÕES DE EMOJIS -->
+        <div class="emoji-list" id="emojiList">
+          <!-- Renderizado via JavaScript de acordo com o produto -->
+        </div>
+      </div>
+
+      <!-- TEMPLATES RÁPIDOS SUGERIDOS -->
+      <div class="chips" id="templatesList">
+        <span class="chip" onclick="setHeadline('❄️ CONFORTO E CLIMATIZAÇÃO PARA SUA CASA')">❄️ Ar & Clima</span>
+        <span class="chip" onclick="setHeadline('🥶 REFRESCÂNCIA MÁXIMA PARA O SEU VERÃO')">🥶 Refrescância</span>
+        <span class="chip" onclick="setHeadline('💣 BOMBA! SUPER OFERTA DO DIA')">💣 Super Oferta</span>
+        <span class="chip" onclick="setHeadline('🏠 CONFORTO E BEM-ESTAR PARA SUA FAMÍLIA')">🏠 Família & Lar</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>3. Nome do Produto</label>
+      <input type="text" id="inputTitulo" value="Ar Condicionado LG Ai Smart Inverter Voice 9000 Btus Frio Branco">
+    </div>
+
+    <div class="grid-2">
+      <div class="campo">
+        <label>Preço "De" (R$)</label>
+        <input type="text" id="inputPrecoDe" value="2399" placeholder="ex: 2399">
+      </div>
+      <div class="campo">
+        <label>Preço "Por" (R$)</label>
+        <input type="text" id="inputPrecoPor" value="1952" placeholder="ex: 1952">
+      </div>
+    </div>
+
+    <!-- CUPOM DE DESCONTO OPCIONAL -->
+    <div class="campo">
+      <label>Cupom de Desconto (Opcional)</label>
+      <input type="text" id="inputCupom" placeholder="ex: SEMPREMODA, SEMPRECASA, MELI10 (deixe em branco se não tiver)">
+      <div class="chips">
+        <span class="chip" onclick="setCupom('SEMPREMODA')">🎟️ SEMPREMODA (Tênis & Moda)</span>
+        <span class="chip" onclick="setCupom('SEMPRECASA')">🎟️ SEMPRECASA (Casa)</span>
+        <span class="chip" onclick="setCupom('MELI10')">🎟️ MELI10 (Geral)</span>
+        <span class="chip" onclick="setCupom('VALE10')">🎟️ VALE10</span>
+        <span class="chip" onclick="setCupom('')" style="background:#fee2e2;color:#991b1b">✕ Sem Cupom</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="campo">
+        <label>Texto da Chamada do Link</label>
+        <input type="text" id="inputChamada" value="👨‍👧‍👦 Pegar Promoção do Paizão" placeholder="ex: 👨‍👧‍👦 Pegar Promoção do Paizão">
+        
+        <!-- EMOJIS DA CHAMADA DO LINK (PAIZÃO, ML, AMAZON, SHOPEE) -->
+        <div class="emoji-toolbar" style="margin-top:6px;padding:6px 8px">
+          <div class="emoji-toolbar-title" style="margin-bottom:4px">
+            <span>🎨 Emojis para o Link:</span>
+            <span class="dica-clique">Clique para inserir</span>
+          </div>
+          <div class="emoji-list" style="gap:4px">
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('👨‍👧‍👦')" title="Paizão Oficial">👨‍👧‍👦</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('👑')" title="Paizão / Rei">👑</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🧔')" title="Paizão">🧔</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('💛')" title="Mercado Livre Amarelo">💛</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🟡')" title="Mercado Livre Círculo">🟡</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🤝')" title="Mercado Livre Mãos">🤝</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('📦')" title="Amazon Pacote">📦</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🛒')" title="Amazon / Carrinho">🛒</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🟠')" title="Shopee Laranja">🟠</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🛍️')" title="Shopee Sacola">🛍️</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('👉')" title="Apontar">👉</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🔥')" title="Fogo">🔥</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('⚡')" title="Raio">⚡</button>
+            <button type="button" class="btn-emoji" style="width:30px;height:30px;font-size:16px" onclick="inserirEmojiChamada('🔗')" title="Link">🔗</button>
+          </div>
+        </div>
+
+        <div class="chips" style="margin-top:6px">
+          <span class="chip" onclick="setChamada('👨‍👧‍👦 Pegar Promoção do Paizão')">👨‍👧‍👦 Promoção do Paizão</span>
+          <span class="chip" onclick="setChamada('👑 Pegar Promoção do Paizão')">👑 Promoção do Paizão</span>
+          <span class="chip" onclick="setChamada('💛 Pegar no Mercado Livre')">💛 Mercado Livre</span>
+          <span class="chip" onclick="setChamada('📦 Pegar na Amazon')">📦 Amazon</span>
+          <span class="chip" onclick="setChamada('🟠 Pegar na Shopee')">🟠 Shopee</span>
+          <span class="chip" onclick="setChamada('pegar promoção')">pegar promoção</span>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Código da Oferta (/p/...)</label>
+        <input type="text" id="inputSlug" value="ar-condicionado-lg" placeholder="ex: ar-condicionado-lg">
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>Foto do Produto (URL da Imagem)</label>
+      <input type="text" id="inputImg" value="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" placeholder="https://...">
+    </div>
+  </div>
+
+  <!-- PREVIEW DO WHATSAPP -->
+  <div class="card-preview">
+    <h2>📱 Pré-visualização no WhatsApp</h2>
+
+    <div class="whats-container">
+      <div class="whats-bubble">
+        <div class="foto-preview">
+          <img id="prevImg" src="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" alt="Produto">
+        </div>
+        <div class="legenda" id="prevTexto"></div>
+        <div class="hora" id="prevHora">19:05</div>
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button class="btn btn-copiar" onclick="copiarPost()">
+        📋 Copiar Post Pronto para o WhatsApp
+      </button>
+      <a id="btnBaixarFoto" class="btn btn-secundario" href="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" target="_blank" download="produto.jpg">
+        📸 Abrir / Baixar Imagem
+      </a>
+      <button class="btn btn-salvar" onclick="salvarOfertaLocal()">
+        💾 Salvar Oferta
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ Post copiado com sucesso!</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+/* =========================================================================
+   DICIONÁRIO INTELIGENTE DE EMOJIS & TEMPLATES POR CATEGORIA
+   ========================================================================= */
+const BANCO_EMOJIS = {
+  clima: {
+    nome: "Ar Condicionado & Clima",
+    emojis: [
+      { e: "🥶", d: "Boneco com frio / Gelado" },
+      { e: "❄️", d: "Floco de Neve / Frio" },
+      { e: "🏠", d: "Casinha / Lar" },
+      { e: "🌡️", d: "Termômetro" },
+      { e: "😌", d: "Bem-estar / Alívio" },
+      { e: "💨", d: "Vento / Ar fresco" },
+      { e: "💣", d: "Bomba de Promoção" },
+      { e: "🔥", d: "Super Oferta" },
+      { e: "⚡", d: "Economia / Inverter" },
+      { e: "💸", d: "Desconto" },
+      { e: "🚨", d: "Alerta Urgente" },
+      { e: "🏆", d: "Top de Linha" }
+    ],
+    templates: [
+      "❄️ CONFORTO E CLIMATIZAÇÃO PARA SUA CASA",
+      "🥶 REFRESCÂNCIA MÁXIMA PARA O SEU VERÃO",
+      "🌡️ O CLIMA PERFEITO DENTRO DA SUA CASA",
+      "💣 BOMBA! SUPER OFERTA DE AR CONDICIONADO",
+      "😌 BEM-ESTAR E ECONOMIA COM TECNOLOGIA INVERTER"
+    ]
+  },
+  tenis: {
+    nome: "Tênis, Calçados & Corrida",
+    emojis: [
+      { e: "👟", d: "Tênis / Calçado" },
+      { e: "🏃", d: "Corrida / Atleta" },
+      { e: "🥇", d: "Medalha de Ouro" },
+      { e: "🏆", d: "Troféu / Campeão" },
+      { e: "💨", d: "Velocidade / Leveza" },
+      { e: "⚡", d: "Performance" },
+      { e: "💣", d: "Bomba de Promoção" },
+      { e: "🔥", d: "Oferta Quente" },
+      { e: "👕", d: "Moda / Estilo" },
+      { e: "🏷️", d: "Desconto Exclusivo" },
+      { e: "💸", d: "Preço Baixo" },
+      { e: "🚨", d: "Estoque Limitado" }
+    ],
+    templates: [
+      "👟 CONFORTO E ESTILO PARA SEU DIA A DIA",
+      "🏃 MÁXIMA PERFORMANCE PARA SEUS TREINOS",
+      "🥇 O TÊNIS CAMPEÃO DE VENDAS COM PREÇO BAIXO",
+      "💣 BOMBA! ACHADINHO EM CALÇADOS",
+      "🔥 OPORTUNIDADE IMPERDÍVEL EM TÊNIS"
+    ]
+  },
+  impressora: {
+    nome: "Impressoras & Escritório",
+    emojis: [
+      { e: "🖨️", d: "Impressora" },
+      { e: "📄", d: "Papel / Documento" },
+      { e: "💼", d: "Escritório / Home Office" },
+      { e: "💻", d: "Computador / Wi-Fi" },
+      { e: "💰", d: "Super Economia" },
+      { e: "🚀", d: "Alta Produtividade" },
+      { e: "💣", d: "Bomba de Oferta" },
+      { e: "🔥", d: "Super Promoção" },
+      { e: "⚡", d: "Rápida e Prática" },
+      { e: "⭐", d: "Nota Máxima" }
+    ],
+    templates: [
+      "🖨️ IMPRESSÃO ECONÔMICA E DE ALTA QUALIDADE",
+      "💰 ECONOMIA REAL DE TINTA PARA SEU DIA A DIA",
+      "💼 PRATICIDADE TOTAL PARA SUA CASA E ESCRITÓRIO",
+      "💣 BOMBA! IMPRESSORA MULTIFUNCIONAL EM OFERTA"
+    ]
+  },
+  cozinha: {
+    nome: "Cozinha & Eletrodomésticos",
+    emojis: [
+      { e: "🍳", d: "Frigideira / Cozinha" },
+      { e: "🍟", d: "Air Fryer / Praticidade" },
+      { e: "☕", d: "Cafeteira / Café" },
+      { e: "👨‍🍳", d: "Chef de Cozinha" },
+      { e: "😋", d: "Saboroso" },
+      { e: "🏠", d: "Casa & Família" },
+      { e: "⚡", d: "Rápido e Prático" },
+      { e: "💣", d: "Bomba de Oferta" },
+      { e: "🔥", d: "Super Oferta" },
+      { e: "💸", d: "Preço Baixo" }
+    ],
+    templates: [
+      "🍳 PRATICIDADE E VELOCIDADE NA COZINHA",
+      "🍟 RECEITAS DELICIOSAS E SAUDÁVEIS SEM ÓLEO",
+      "☕ O CAFÉ PERFEITO NA HORA QUE VOCÊ QUISER",
+      "💣 BOMBA! ELETROPORTÁTEIS COM DESCONTO REAL"
+    ]
+  },
+  tech: {
+    nome: "Celulares, Áudio & Games",
+    emojis: [
+      { e: "📱", d: "Smartphone" },
+      { e: "🎧", d: "Fone de Ouvido" },
+      { e: "⌚", d: "Smartwatch" },
+      { e: "🎮", d: "Gamer / Controle" },
+      { e: "🔊", d: "Som Potente" },
+      { e: "🔋", d: "Super Bateria" },
+      { e: "🚀", d: "Velocidade" },
+      { e: "💣", d: "Bomba de Promoção" },
+      { e: "🔥", d: "Lançamento / Quente" },
+      { e: "⚡", d: "Top de Linha" }
+    ],
+    templates: [
+      "📱 SUPER OFERTA EM SMARTPHONE",
+      "🎧 ÁUDIO DE ALTA QUALIDADE E POTÊNCIA",
+      "🎮 SETUP GAMER COM PREÇO IMBATÍVEL",
+      "⌚ TECNOLOGIA E SAÚDE NO SEU PULSO",
+      "💣 BOMBA! TECNOLOGIA COM SUPER DESCONTO"
+    ]
+  },
+  casa: {
+    nome: "Casa, Limpeza & Organização",
+    emojis: [
+      { e: "🏠", d: "Casinha / Lar" },
+      { e: "🗑️", d: "Lixeira Inteligente" },
+      { e: "🧹", d: "Limpeza" },
+      { e: "✨", d: "Brilho / Limpo" },
+      { e: "🤖", d: "Sensor / Robô" },
+      { e: "😌", d: "Praticidade" },
+      { e: "💣", d: "Bomba de Oferta" },
+      { e: "🔥", d: "Super Oferta" },
+      { e: "💸", d: "Economia" },
+      { e: "🚨", d: "Urgente" }
+    ],
+    templates: [
+      "🏠 PRATICIDADE E HIGIENE PARA SUA CASA",
+      "✨ CASA LIMPA E ORGANIZADA COM FACILIDADE",
+      "🤖 TECNOLOGIA E CONFORTO PARA SEU LAR",
+      "💣 BOMBA! ACHADINHO PARA SUA CASA"
+    ]
+  },
+  geral: {
+    nome: "Promoções Gerais & Achadinhos",
+    emojis: [
+      { e: "🔥", d: "Super Oferta" },
+      { e: "⚡", d: "Relâmpago" },
+      { e: "💥", d: "Preço Explodiu" },
+      { e: "🚨", d: "Alerta Urgente" },
+      { e: "💣", d: "Bomba" },
+      { e: "🏆", d: "Top Escolha" },
+      { e: "⭐", d: "Destaque" },
+      { e: "🎯", d: "Achadinho Certeiro" },
+      { e: "🚀", d: "Corre que Acaba" },
+      { e: "💸", d: "Preço Baixo" },
+      { e: "🏷️", d: "Super Cupom" },
+      { e: "🎁", d: "Presente" }
+    ],
+    templates: [
+      "🔥 SUPER OFERTA EXCLUSIVA DO DIA",
+      "⚡ PROMOÇÃO RELÂMPAGO! CORRE QUE ACABA",
+      "💣 BOMBA! MENOR PREÇO DO ANO",
+      "🎯 ACHADINHO IMPERDÍVEL DO PAIZÃO",
+      "🚨 ALERTA DE PREÇO BAIXO! APROVEITE"
+    ]
+  }
+};
+
+let categoriaAtiva = 'clima';
+let modoAba = 'auto';
+
+/* Detecta a categoria baseando-se no título ou URL */
+function identificarCategoria(texto) {
+  const t = (texto || '').toLowerCase();
+  if (t.includes('ar condicionado') || t.includes('climatizador') || t.includes('ventilador') || t.includes('split') || t.includes('btus') || t.includes('inverter') || t.includes('aquecedor')) {
+    return 'clima';
+  } else if (t.includes('tenis') || t.includes('tênis') || t.includes('sapato') || t.includes('corrida') || t.includes('nike') || t.includes('adidas') || t.includes('olympikus') || t.includes('sandalia') || t.includes('calcado') || t.includes('camisa') || t.includes('bermuda')) {
+    return 'tenis';
+  } else if (t.includes('impressora') || t.includes('ecotank') || t.includes('epson') || t.includes('toner') || t.includes('multifuncional') || t.includes('cartucho')) {
+    return 'impressora';
+  } else if (t.includes('fritadeira') || t.includes('air fryer') || t.includes('airfryer') || t.includes('panela') || t.includes('cafeteira') || t.includes('liquidificador') || t.includes('batedeira') || t.includes('microondas') || t.includes('forno')) {
+    return 'cozinha';
+  } else if (t.includes('celular') || t.includes('smartphone') || t.includes('fone') || t.includes('headset') || t.includes('airpod') || t.includes('smartwatch') || t.includes('relogio') || t.includes('gamer') || t.includes('xbox') || t.includes('playstation') || t.includes('ps5') || t.includes('som') || t.includes('jbl')) {
+    return 'tech';
+  } else if (t.includes('lixeira') || t.includes('aspirador') || t.includes('robo') || t.includes('sensor') || t.includes('mop') || t.includes('limpeza') || t.includes('travesseiro') || t.includes('colchao') || t.includes('toalha')) {
+    return 'casa';
+  }
+  return 'geral';
+}
+
+function renderizarToolbarEmojis(catKey) {
+  const dados = BANCO_EMOJIS[catKey] || BANCO_EMOJIS.geral;
+  
+  // Atualiza badge de categoria
+  $('#nomeCategoria').textContent = dados.nome;
+  
+  // Renderiza botões de emojis
+  const container = $('#emojiList');
+  container.innerHTML = dados.emojis.map(item => `
+    <button type="button" class="btn-emoji" onclick="inserirEmoji('${item.e}')" title="${item.d}">
+      ${item.e}
+    </button>
+  `).join('');
+
+  // Renderiza templates sugeridos
+  const tContainer = $('#templatesList');
+  tContainer.innerHTML = dados.templates.map(tpl => `
+    <span class="chip" onclick="setHeadline('${tpl.replace(/'/g, "\\'")}')">${tpl.split(' ').slice(0, 3).join(' ')}...</span>
+  `).join('');
+}
+
+function selecionarAba(abaKey) {
+  modoAba = abaKey;
+  
+  // Atualiza botões de abas
+  document.querySelectorAll('.tab-cat').forEach(b => b.classList.remove('ativa'));
+  
+  if (abaKey === 'auto') {
+    const detected = identificarCategoria($('#inputTitulo').value + ' ' + $('#inputUrl').value);
+    categoriaAtiva = detected;
+    renderizarToolbarEmojis(detected);
+    event.target.classList.add('ativa');
+  } else {
+    categoriaAtiva = abaKey;
+    renderizarToolbarEmojis(abaKey);
+    event.target.classList.add('ativa');
+  }
+}
+
+function atualizarDeteccaoCategoria() {
+  if (modoAba === 'auto') {
+    const detected = identificarCategoria($('#inputTitulo').value + ' ' + $('#inputUrl').value);
+    if (detected !== categoriaAtiva) {
+      categoriaAtiva = detected;
+      renderizarToolbarEmojis(detected);
+    }
+  }
+}
+
+function setHeadline(txt) {
+  $('#inputHeadline').value = txt;
+  atualizarPreview();
+}
+
+function setChamada(txt) {
+  $('#inputChamada').value = txt;
+  atualizarPreview();
+}
+
+function setCupom(txt) {
+  $('#inputCupom').value = txt;
+  atualizarPreview();
+}
+
+function inserirEmoji(emoji) {
+  const input = $('#inputHeadline');
+  const start = input.selectionStart || 0;
+  const end = input.selectionEnd || 0;
+  const text = input.value;
+  
+  if (!text.trim()) {
+    input.value = emoji + ' ';
+  } else {
+    input.value = text.substring(0, start) + emoji + ' ' + text.substring(end);
+  }
+  
+  input.focus();
+  const novaPos = start + emoji.length + 1;
+  input.setSelectionRange(novaPos, novaPos);
+  
+  atualizarPreview();
+}
+
+function inserirEmojiChamada(emoji) {
+  const input = $('#inputChamada');
+  const start = input.selectionStart || 0;
+  const end = input.selectionEnd || 0;
+  const text = input.value;
+  
+  if (!text.trim()) {
+    input.value = emoji + ' ';
+  } else {
+    input.value = text.substring(0, start) + emoji + ' ' + text.substring(end);
+  }
+  
+  input.focus();
+  const novaPos = start + emoji.length + 1;
+  input.setSelectionRange(novaPos, novaPos);
+  
+  atualizarPreview();
+}
+
+function gerarSlug(txt) {
+  return txt.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 3)
+    .join('-');
+}
+
+function gerarHeadlinePadrao(catKey) {
+  const cat = BANCO_EMOJIS[catKey] || BANCO_EMOJIS.geral;
+  return cat.templates[0];
+}
+
+function montarTexto() {
+  const headline = $('#inputHeadline').value.trim();
+  const titulo = $('#inputTitulo').value.trim();
+  const de = $('#inputPrecoDe').value.trim();
+  const por = $('#inputPrecoPor').value.trim();
+  const cupom = $('#inputCupom').value.trim();
+  const chamada = ($('#inputChamada').value || 'Pegar Promoção do Paizão').trim();
+  const slug = $('#inputSlug').value.trim() || 'oferta';
+
+  let linhaPreco = '';
+  if (de && por && Number(de.replace(/\D/g,'')) > Number(por.replace(/\D/g,''))) {
+    linhaPreco = `De R$ ${de} por R$ ${por}`;
+  } else if (por) {
+    linhaPreco = `Por R$ ${por}`;
+  } else {
+    linhaPreco = `Confira o preço especial no link`;
+  }
+
+  let blocoCupom = '';
+  if (cupom) {
+    blocoCupom = `\n🏷️ USE O CUPOM: ${cupom.toUpperCase()}`;
+  }
+
+  const linkPaizao = `https://paizaodosdescontos.com.br/p/${slug}`;
+
+  return `${headline}
+
+${titulo}
+
+${linhaPreco}${blocoCupom}
+
+${chamada}
+${linkPaizao}
+
+🫵🏽 Participe do nosso grupo:
+https://paizaodosdescontos.com.br/grupos`;
+}
+
+function atualizarPreview() {
+  const texto = montarTexto();
+  $('#prevTexto').textContent = texto;
+
+  const img = $('#inputImg').value.trim();
+  if (img) {
+    $('#prevImg').src = img;
+    $('#btnBaixarFoto').href = img;
+  }
+
+  const agora = new Date();
+  $('#prevHora').textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Auto detecção e auto slug ao digitar título
+$('#inputTitulo').addEventListener('input', () => {
+  const s = gerarSlug($('#inputTitulo').value);
+  if (s) $('#inputSlug').value = s;
+  atualizarDeteccaoCategoria();
+  atualizarPreview();
+});
+
+['inputUrl', 'inputHeadline', 'inputPrecoDe', 'inputPrecoPor', 'inputCupom', 'inputChamada', 'inputSlug', 'inputImg'].forEach(id => {
+  $(`#${id}`).addEventListener('input', atualizarPreview);
+  $(`#${id}`).addEventListener('change', atualizarPreview);
+});
+
+// Auto-busca ao colar novo link
+$('#inputUrl').addEventListener('paste', () => {
+  setTimeout(buscarDadosOferta, 100);
+});
+
+async function buscarDadosOferta() {
+  const url = $('#inputUrl').value.trim();
+  if (!url) return;
+
+  const btn = $('#btnBuscar');
+  const status = $('#statusBar');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Buscando...';
+  status.textContent = 'Buscando dados do produto na loja...';
+  status.style.color = '#0284c7';
+
+  try {
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+    const html = data.contents;
+
+    if (html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // 1. Título
+      const ogTitle = doc.querySelector('meta[property="og:title"]')?.content ||
+                      doc.querySelector('meta[name="title"]')?.content ||
+                      doc.title || '';
+      const tituloLimpo = ogTitle
+        .replace(/\s*\|\s*MercadoLivre.*$/i, '')
+        .replace(/\s*\|\s*Mercado Livre.*$/i, '')
+        .replace(/\s*\|\s*Perfil Social.*$/i, '')
+        .replace(/^PAIZAODOSDESCONTOS\s*\|\s*/i, '')
+        .trim();
+
+      if (tituloLimpo) {
+        $('#inputTitulo').value = tituloLimpo;
+        $('#inputSlug').value = gerarSlug(tituloLimpo);
+        
+        // Auto identifica categoria e atualiza emojis e headline sugerida
+        const cat = identificarCategoria(tituloLimpo + ' ' + url);
+        categoriaAtiva = cat;
+        renderizarToolbarEmojis(cat);
+        $('#inputHeadline').value = gerarHeadlinePadrao(cat);
+      }
+
+      // 2. Imagem
+      const ogImage = doc.querySelector('meta[property="og:image"]')?.content ||
+                      doc.querySelector('meta[name="image"]')?.content ||
+                      doc.querySelector('.ui-pdp-image')?.src || '';
+      if (ogImage) {
+        $('#inputImg').value = ogImage;
+      }
+
+      // 3. Preço
+      const precoMatch = html.match(/andes-money-amount__fraction["']?>([0-9\.\,]+)</);
+      if (precoMatch && precoMatch[1]) {
+        $('#inputPrecoPor').value = precoMatch[1].replace('.','');
+      }
+
+      status.textContent = '✅ Dados carregados com sucesso!';
+      status.style.color = '#059669';
+      atualizarPreview();
+    }
+  } catch (err) {
+    console.log(err);
+    status.textContent = '⚠️ Dica: Você também pode rodar o gerar-oferta.bat com 2 cliques!';
+    status.style.color = '#d97706';
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '🔍 Buscar';
+  }
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function copiarPost() {
+  const texto = montarTexto();
+  navigator.clipboard.writeText(texto).then(() => {
+    toast('📋 Post copiado! Dê Ctrl+V na legenda da foto no WhatsApp!');
+  }).catch(() => {
+    toast('⚠️ Selecione e copie o texto manualmente.');
+  });
+}
+
+function salvarOfertaLocal() {
+  const slug = $('#inputSlug').value.trim();
+  const url = $('#inputUrl').value.trim();
+  const titulo = $('#inputTitulo').value.trim();
+  const por = $('#inputPrecoPor').value.trim();
+
+  let salvas = JSON.parse(localStorage.getItem('paizao_ofertas') || '{}');
+  salvas[slug] = { url, titulo, preco: por, salvo_em: new Date().toISOString() };
+  localStorage.setItem('paizao_ofertas', JSON.stringify(salvas));
+
+  toast(`✅ Oferta '${slug}' salva com sucesso!`);
+}
+
+// Inicializa a toolbar de emojis dinâmicos
+renderizarToolbarEmojis('clima');
+atualizarPreview();
+</script>
+</body>
+</html>
