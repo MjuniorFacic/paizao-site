@@ -998,83 +998,105 @@ async function buscarDadosOferta() {
   status.textContent = 'Buscando dados da oferta...';
   status.style.color = '#0284c7';
 
-  let html = '';
-
-  // Tenta proxies CORS em sequência para garantir que sempre funcione
-  const proxies = [
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-  ];
-
-  for (const p of proxies) {
-    try {
-      const res = await fetch(p);
-      if (res.ok) {
-        if (p.includes('allorigins')) {
-          const data = await res.json();
-          html = data.contents || '';
-        } else {
-          html = await res.text();
-        }
-        if (html) break;
-      }
-    } catch (e) {
-      console.log('Tentando próximo proxy...');
-    }
-  }
+  let tituloExtraido = '';
+  let imagemExtraida = '';
+  let precoExtraido = '';
 
   try {
-    if (html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+    // 1. Tenta API rápida e direta do Microlink (Resolve perfeitamente links curtos meli.la)
+    try {
+      const resMicro = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+      if (resMicro.ok) {
+        const dataMicro = await resMicro.json();
+        if (dataMicro.status === 'success' && dataMicro.data) {
+          tituloExtraido = dataMicro.data.title || '';
+          imagemExtraida = dataMicro.data.image?.url || '';
+        }
+      }
+    } catch (e) {
+      console.log('Microlink fallback...', e);
+    }
 
-      // 1. Título
-      const ogTitle = doc.querySelector('meta[property="og:title"]')?.content ||
-                      doc.querySelector('meta[name="title"]')?.content ||
-                      doc.title || '';
-      const tituloLimpo = ogTitle
+    // 2. Se necessário, tenta proxy HTML para pegar preços ou complementar
+    if (!tituloExtraido || !imagemExtraida) {
+      const proxies = [
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+      ];
+
+      for (const p of proxies) {
+        try {
+          const res = await fetch(p);
+          if (res.ok) {
+            let html = '';
+            if (p.includes('allorigins')) {
+              const data = await res.json();
+              html = data.contents || '';
+            } else {
+              html = await res.text();
+            }
+            if (html) {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              if (!tituloExtraido) {
+                tituloExtraido = doc.querySelector('meta[property="og:title"]')?.content ||
+                                 doc.querySelector('meta[name="title"]')?.content ||
+                                 doc.title || '';
+              }
+              if (!imagemExtraida) {
+                imagemExtraida = doc.querySelector('meta[property="og:image"]')?.content ||
+                                 doc.querySelector('meta[name="image"]')?.content ||
+                                 doc.querySelector('.ui-pdp-image')?.src || '';
+              }
+              const precoMatch = html.match(/andes-money-amount__fraction["']?>([0-9\.\,]+)</);
+              if (precoMatch && precoMatch[1]) {
+                precoExtraido = precoMatch[1].replace('.','');
+              }
+              break;
+            }
+          }
+        } catch (errProxy) {
+          console.log('Tentando próximo...');
+        }
+      }
+    }
+
+    if (tituloExtraido) {
+      const tituloLimpo = tituloExtraido
         .replace(/\s*\|\s*MercadoLivre.*$/i, '')
         .replace(/\s*\|\s*Mercado Livre.*$/i, '')
         .replace(/\s*\|\s*Perfil Social.*$/i, '')
         .replace(/^PAIZAODOSDESCONTOS\s*\|\s*/i, '')
         .trim();
 
-      if (tituloLimpo) {
-        $('#inputTitulo').value = tituloLimpo;
-        $('#inputSlug').value = gerarSlug(tituloLimpo);
-        
-        const cat = identificarCategoria(tituloLimpo + ' ' + url);
-        categoriaAtiva = cat;
-        renderizarToolbarEmojis(cat);
-        $('#inputHeadline').value = gerarHeadlinePadrao(cat);
-      }
-
-      // 2. Imagem
-      const ogImage = doc.querySelector('meta[property="og:image"]')?.content ||
-                      doc.querySelector('meta[name="image"]')?.content ||
-                      doc.querySelector('.ui-pdp-image')?.src || '';
-      if (ogImage) {
-        $('#inputImg').value = ogImage;
-      }
-
-      // 3. Preço
-      const precoMatch = html.match(/andes-money-amount__fraction["']?>([0-9\.\,]+)</);
-      if (precoMatch && precoMatch[1]) {
-        $('#inputPrecoPor').value = precoMatch[1].replace('.','');
-      }
-
-      status.textContent = '✅ Dados carregados com sucesso!';
-      status.style.color = '#059669';
-      setTimeout(() => { status.textContent = ''; }, 3500);
-      atualizarPreview();
-    } else {
-      status.textContent = '✅ Pronto para editar e personalizar!';
-      status.style.color = '#059669';
-      setTimeout(() => { status.textContent = ''; }, 3000);
+      $('#inputTitulo').value = tituloLimpo;
+      $('#inputSlug').value = gerarSlug(tituloLimpo);
+      
+      // Auto identifica categoria e atualiza emojis e headline sugerida
+      const cat = identificarCategoria(tituloLimpo + ' ' + url);
+      categoriaAtiva = cat;
+      renderizarToolbarEmojis(cat);
+      $('#inputHeadline').value = gerarHeadlinePadrao(cat);
     }
+
+    if (imagemExtraida) {
+      $('#inputImg').value = imagemExtraida;
+    }
+
+    if (precoExtraido) {
+      $('#inputPrecoPor').value = precoExtraido;
+    }
+
+    status.textContent = '✅ Dados carregados com sucesso!';
+    status.style.color = '#059669';
+    setTimeout(() => { status.textContent = ''; }, 3500);
+    atualizarPreview();
+
   } catch (err) {
-    console.log(err);
-    status.textContent = '';
+    console.log('Erro geral:', err);
+    status.textContent = '✅ Pronto para personalizar!';
+    status.style.color = '#059669';
+    setTimeout(() => { status.textContent = ''; }, 3000);
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '🔍 Buscar';
