@@ -402,25 +402,28 @@
     text-decoration: none;
   }
 
-  .btn-copiar {
-    background: var(--whats-green);
-    color: #fff;
-    grid-column: span 2;
-    box-shadow: 0 4px 14px rgba(37,211,102,0.3);
-  }
-  .btn-copiar:hover { background: #20bd5a; transform: translateY(-1px); }
-
-  .btn-secundario {
-    background: #e2e8f0;
-    color: #334155;
-  }
-  .btn-secundario:hover { background: #cbd5e1; }
-
   .btn-salvar {
     background: var(--navy);
     color: var(--amarelo);
+    grid-column: span 2;
+    box-shadow: 0 4px 14px rgba(0,36,86,0.25);
+    font-size: 15px;
   }
-  .btn-salvar:hover { background: var(--navy-2); }
+  .btn-salvar:hover { background: var(--navy-2); transform: translateY(-1px); }
+
+  .btn-secundario {
+    background: #f1f5f9;
+    border: 1.5px solid #cbd5e1;
+    color: #334155;
+  }
+  .btn-secundario:hover { background: #e2e8f0; }
+
+  .btn-copiar {
+    background: var(--whats-green);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(37,211,102,0.28);
+  }
+  .btn-copiar:hover { background: #20bd5a; transform: translateY(-1px); }
 
   /* STATUS BAR */
   .status-bar {
@@ -620,14 +623,14 @@
     </div>
 
     <div class="acoes">
-      <button class="btn btn-copiar" onclick="copiarPost()">
-        📋 Copiar Post Pronto para o WhatsApp
+      <button class="btn btn-salvar" id="btnSalvarPublicar" onclick="salvarEPublicar()" style="grid-column:span 2;padding:15px">
+        🚀 1º Passo: Salvar & Publicar no Site (Netlify)
       </button>
       <a id="btnBaixarFoto" class="btn btn-secundario" href="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" target="_blank" download="produto.jpg">
-        📸 Abrir / Baixar Imagem
+        📸 2º Passo: Baixar Imagem
       </a>
-      <button class="btn btn-salvar" id="btnSalvarPublicar" onclick="salvarEPublicar()">
-        🚀 Salvar & Publicar no Site (Netlify)
+      <button class="btn btn-copiar" onclick="copiarPost()">
+        📋 3º Passo: Copiar Post
       </button>
     </div>
   </div>
