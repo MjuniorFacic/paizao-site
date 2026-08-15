@@ -1031,9 +1031,9 @@ async function buscarDadosOferta() {
   let precoExtraido = '';
 
   try {
-    // 1. Tenta API rápida e direta do Microlink com extração de preços
+    // 1. Tenta API rápida e direta do Microlink com separação exata de Preço 'De' e 'Por'
     try {
-      const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.price.selector=.andes-money-amount__fraction&data.cents.selector=.andes-money-amount__cents&data.original.selector=.ui-pdp-price__original-value .andes-money-amount__fraction`;
+      const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.priceDe.selector=s .andes-money-amount__fraction&data.centsDe.selector=s .andes-money-amount__cents&data.pricePor.selector=.andes-money-amount:not(s) .andes-money-amount__fraction&data.centsPor.selector=.andes-money-amount:not(s) .andes-money-amount__cents`;
       const resMicro = await fetch(microUrl);
       if (resMicro.ok) {
         const dataMicro = await resMicro.json();
@@ -1041,15 +1041,20 @@ async function buscarDadosOferta() {
           tituloExtraido = dataMicro.data.title || '';
           imagemExtraida = dataMicro.data.image?.url || '';
 
-          if (dataMicro.data.price) {
-            let pStr = String(dataMicro.data.price).replace(/\./g, '');
-            let cents = dataMicro.data.cents ? String(dataMicro.data.cents) : '00';
-            if (cents.length === 1) cents += '0';
-            precoExtraido = `${pStr},${cents}`;
+          // Preço "De" (valor riscado / original)
+          if (dataMicro.data.priceDe) {
+            let pDe = String(dataMicro.data.priceDe).replace(/\./g, '');
+            let cDe = dataMicro.data.centsDe ? String(dataMicro.data.centsDe) : '00';
+            if (cDe.length === 1) cDe += '0';
+            $('#inputPrecoDe').value = `${pDe},${cDe}`;
           }
-          if (dataMicro.data.original) {
-            let pOrig = String(dataMicro.data.original).replace(/\./g, '');
-            $('#inputPrecoDe').value = `${pOrig},00`;
+
+          // Preço "Por" (valor com desconto)
+          if (dataMicro.data.pricePor) {
+            let pPor = String(dataMicro.data.pricePor).replace(/\./g, '');
+            let cPor = dataMicro.data.centsPor ? String(dataMicro.data.centsPor) : '00';
+            if (cPor.length === 1) cPor += '0';
+            precoExtraido = `${pPor},${cPor}`;
           }
         }
       }
