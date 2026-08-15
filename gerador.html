@@ -1031,14 +1031,26 @@ async function buscarDadosOferta() {
   let precoExtraido = '';
 
   try {
-    // 1. Tenta API rápida e direta do Microlink (Resolve perfeitamente links curtos meli.la)
+    // 1. Tenta API rápida e direta do Microlink com extração de preços
     try {
-      const resMicro = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+      const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.price.selector=.andes-money-amount__fraction&data.cents.selector=.andes-money-amount__cents&data.original.selector=.ui-pdp-price__original-value .andes-money-amount__fraction`;
+      const resMicro = await fetch(microUrl);
       if (resMicro.ok) {
         const dataMicro = await resMicro.json();
         if (dataMicro.status === 'success' && dataMicro.data) {
           tituloExtraido = dataMicro.data.title || '';
           imagemExtraida = dataMicro.data.image?.url || '';
+
+          if (dataMicro.data.price) {
+            let pStr = String(dataMicro.data.price).replace(/\./g, '');
+            let cents = dataMicro.data.cents ? String(dataMicro.data.cents) : '00';
+            if (cents.length === 1) cents += '0';
+            precoExtraido = `${pStr},${cents}`;
+          }
+          if (dataMicro.data.original) {
+            let pOrig = String(dataMicro.data.original).replace(/\./g, '');
+            $('#inputPrecoDe').value = `${pOrig},00`;
+          }
         }
       }
     } catch (e) {
