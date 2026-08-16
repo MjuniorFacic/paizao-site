@@ -997,7 +997,7 @@ function montarTexto() {
     blocoCupom = `\n🏷️ USE O CUPOM: ${cupom.toUpperCase()}`;
   }
 
-  const linkPaizao = `https://paizaodosdescontos.com.br/p/${slug}`;
+  const linkPaizao = `https://www.paizaodosdescontos.com.br/p?id=${slug}`;
 
   return `${headline}
 
@@ -1009,7 +1009,7 @@ ${chamada}
 ${linkPaizao}
 
 🫵🏽 Participe do nosso grupo:
-https://paizaodosdescontos.com.br/grupos`;
+https://www.paizaodosdescontos.com.br/grupos`;
 }
 
 function atualizarPreview() {
@@ -1023,7 +1023,7 @@ function atualizarPreview() {
   }
 
   const slug = $('#inputSlug').value.trim() || 'oferta';
-  $('#btnTestarLink').href = `https://paizaodosdescontos.com.br/p/${slug}`;
+  $('#btnTestarLink').href = `https://www.paizaodosdescontos.com.br/p?id=${slug}`;
 
   const agora = new Date();
   $('#prevHora').textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -1243,7 +1243,7 @@ function habilitarPassos(slug, imgUrl) {
   $('#btnBaixarFoto').classList.remove('disabled');
   if (imgUrl) $('#btnBaixarFoto').href = imgUrl;
   $('#btnTestarLink').classList.remove('disabled');
-  $('#btnTestarLink').href = `https://paizaodosdescontos.com.br/p/${slug}`;
+  $('#btnTestarLink').href = `https://www.paizaodosdescontos.com.br/p?id=${slug}`;
   $('#btnCopiarPost').classList.remove('disabled');
   $('#btnSalvarPublicar').classList.add('sucesso');
   $('#btnSalvarPublicar').innerHTML = '✅ 1º Passo: Publicado com Sucesso!';
