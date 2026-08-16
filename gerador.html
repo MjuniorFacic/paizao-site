@@ -1066,40 +1066,43 @@ async function buscarDadosOferta() {
   status.textContent = 'Buscando dados da oferta...';
   status.style.color = '#0284c7';
 
-  // Limpa valores anteriores para evitar manter preços de produtos antigos
+  // Limpa valores anteriores
   $('#inputPrecoDe').value = '';
   $('#inputPrecoPor').value = '';
   $('#inputCupom').value = '';
 
   let tituloExtraido = '';
   let imagemExtraida = '';
-  let precoExtraido = '';
+  let precoDeExtraido = '';
+  let precoPorExtraido = '';
 
   try {
-    // 1. Tenta API rápida e direta do Microlink com separação exata de Preço 'De' e 'Por'
+    // 1. Tenta API rápida e direta do Microlink
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
       const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.priceDe.selector=s .andes-money-amount__fraction&data.centsDe.selector=s .andes-money-amount__cents&data.pricePor.selector=.andes-money-amount:not(s) .andes-money-amount__fraction&data.centsPor.selector=.andes-money-amount:not(s) .andes-money-amount__cents`;
-      const resMicro = await fetch(microUrl);
+      
+      const resMicro = await fetch(microUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (resMicro.ok) {
         const dataMicro = await resMicro.json();
         if (dataMicro.status === 'success' && dataMicro.data) {
           tituloExtraido = dataMicro.data.title || '';
           imagemExtraida = dataMicro.data.image?.url || '';
 
-          // Preço "De" (valor riscado / original)
           if (dataMicro.data.priceDe) {
             let pDe = String(dataMicro.data.priceDe).replace(/\./g, '');
             let cDe = dataMicro.data.centsDe ? String(dataMicro.data.centsDe) : '00';
             if (cDe.length === 1) cDe += '0';
-            $('#inputPrecoDe').value = `${pDe},${cDe}`;
+            precoDeExtraido = `${pDe},${cDe}`;
           }
 
-          // Preço "Por" (valor com desconto)
           if (dataMicro.data.pricePor) {
             let pPor = String(dataMicro.data.pricePor).replace(/\./g, '');
             let cPor = dataMicro.data.centsPor ? String(dataMicro.data.centsPor) : '00';
             if (cPor.length === 1) cPor += '0';
-            precoExtraido = `${pPor},${cPor}`;
+            precoPorExtraido = `${pPor},${cPor}`;
           }
         }
       }
@@ -1107,7 +1110,7 @@ async function buscarDadosOferta() {
       console.log('Microlink fallback...', e);
     }
 
-    // 2. Se necessário, tenta proxy HTML para pegar preços ou complementar
+    // 2. Se necessário, tenta proxy HTML para pegar dados
     if (!tituloExtraido || !imagemExtraida) {
       const proxies = [
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
@@ -1116,7 +1119,10 @@ async function buscarDadosOferta() {
 
       for (const p of proxies) {
         try {
-          const res = await fetch(p);
+          const controllerP = new AbortController();
+          const timeoutP = setTimeout(() => controllerP.abort(), 5000);
+          const res = await fetch(p, { signal: controllerP.signal });
+          clearTimeout(timeoutP);
           if (res.ok) {
             let html = '';
             if (p.includes('allorigins')) {
@@ -1138,21 +1144,11 @@ async function buscarDadosOferta() {
                                  doc.querySelector('meta[name="image"]')?.content ||
                                  doc.querySelector('.ui-pdp-image')?.src || '';
               }
-              const precoMatch = html.match(/"price":\s*([0-9\.]+)/) ||
-                                 html.match(/"lowPrice":\s*([0-9\.]+)/) ||
-                                 html.match(/andes-money-amount__fraction["']?>([0-9\.\,]+)</) ||
-                                 html.match(/R\$\s*([0-9\.\,]+)/);
-              if (precoMatch && precoMatch[1]) {
-                let p = precoMatch[1].replace('.', ',');
-                if (!p.includes(',')) p += ',00';
-                else if (p.split(',')[1].length === 1) p += '0';
-                precoExtraido = p;
-              }
               break;
             }
           }
         } catch (errProxy) {
-          console.log('Tentando próximo...');
+          console.log('Tentando próximo proxy...');
         }
       }
     }
@@ -1168,7 +1164,6 @@ async function buscarDadosOferta() {
       $('#inputTitulo').value = tituloLimpo;
       $('#inputSlug').value = gerarSlug(tituloLimpo);
       
-      // Auto identifica categoria e atualiza emojis e headline sugerida
       const cat = identificarCategoria(tituloLimpo + ' ' + url);
       categoriaAtiva = cat;
       renderizarToolbarEmojis(cat);
@@ -1179,14 +1174,16 @@ async function buscarDadosOferta() {
       $('#inputImg').value = imagemExtraida;
     }
 
-    if (precoExtraido) {
-      $('#inputPrecoPor').value = precoExtraido;
+    if (precoDeExtraido) {
+      $('#inputPrecoDe').value = precoDeExtraido;
+    }
+    if (precoPorExtraido) {
+      $('#inputPrecoPor').value = precoPorExtraido;
     }
 
     status.textContent = '✅ Dados carregados com sucesso!';
     status.style.color = '#059669';
     setTimeout(() => { status.textContent = ''; }, 3500);
-    atualizarPreview();
 
   } catch (err) {
     console.log('Erro geral:', err);
@@ -1196,6 +1193,7 @@ async function buscarDadosOferta() {
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '🔍 Buscar';
+    atualizarPreview();
   }
 }
 
