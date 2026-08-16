@@ -46,11 +46,12 @@ export default async function handler(req, res) {
     let priceDe = '';
     let pricePor = '';
 
-    // Procura valor riscado (preço De)
-    const deMatch = html.match(/<s>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
-                    html.match(/andes-money-amount--previous.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is);
-    const deCentsMatch = html.match(/<s>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is) ||
-                         html.match(/andes-money-amount--previous.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is);
+    // 1. Preço 'De' (Riscado / Anterior)
+    const deMatch = html.match(/class="[^"]*andes-money-amount--previous[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
+                    html.match(/<s[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
+                    html.match(/class="[^"]*ui-pdp-price__original-value[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is);
+    const deCentsMatch = html.match(/class="[^"]*andes-money-amount--previous[^"]*"[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is) ||
+                         html.match(/<s[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is);
 
     if (deMatch && deMatch[1]) {
       let pDe = deMatch[1].replace(/\./g, '');
@@ -59,17 +60,23 @@ export default async function handler(req, res) {
       priceDe = `${pDe},${cDe}`;
     }
 
-    // Procura valor com desconto ativo (preço Por)
-    const porMatch = html.match(/andes-money-amount:not\(s\).*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
+    // 2. Preço 'Por' (Preço Atual com Desconto)
+    const porMatch = html.match(/class="[^"]*ui-pdp-price__second-line[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
+                     html.match(/class="[^"]*andes-money-amount--cents-superscript[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
                      html.match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
-    const porCentsMatch = html.match(/andes-money-amount:not\(s\).*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is) ||
-                          html.match(/andes-money-amount__cents[^>]*>([0-9]+)<\/span>/i);
+    const porCentsMatch = html.match(/class="[^"]*ui-pdp-price__second-line[^"]*"[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is) ||
+                          html.match(/class="[^"]*andes-money-amount--cents-superscript[^"]*"[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is);
 
     if (porMatch && porMatch[1]) {
       let pPor = porMatch[1].replace(/\./g, '');
-      let cPor = porCentsMatch ? porCentsMatch[1] : '00';
-      if (cPor.length === 1) cPor += '0';
-      pricePor = `${pPor},${cPor}`;
+      let cPor = porCentsMatch ? porCentsMatch[1] : '';
+      if (cPor && cPor.length === 1) cPor += '0';
+      pricePor = cPor ? `${pPor},${cPor}` : `${pPor}`;
+    }
+
+    // Se os dois preços forem iguais por erro de seletor, limpa o 'De'
+    if (priceDe && pricePor && priceDe === pricePor) {
+      priceDe = '';
     }
 
     return res.status(200).json({
