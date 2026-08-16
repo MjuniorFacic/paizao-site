@@ -42,14 +42,16 @@ export default async function handler(req, res) {
     let title = '';
     const ogTitle = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) ||
                     html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
-    if (ogTitle && ogTitle[1]) {
+    if (ogTitle && ogTitle[1] && !ogTitle[1].includes('Não é possível') && !ogTitle[1].includes('Acesso negado')) {
       title = ogTitle[1];
     } else {
       const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-      if (titleMatch && titleMatch[1]) title = titleMatch[1];
+      if (titleMatch && titleMatch[1] && !titleMatch[1].includes('Não é possível') && !titleMatch[1].includes('Acesso negado')) {
+        title = titleMatch[1];
+      }
     }
 
-    // Se o título não veio no HTML (ex: Magalu com bloqueio Cloudflare), extrai do próprio slug da URL
+    // Se o título não veio no HTML ou foi bloqueado pelo Cloudflare, extrai do próprio slug da URL
     if (!title && finalUrl.includes('/p/')) {
       const parts = finalUrl.split('/p/')[0].split('/');
       const slugProduct = parts[parts.length - 1];

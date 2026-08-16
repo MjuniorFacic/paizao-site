@@ -1125,21 +1125,48 @@ async function buscarDadosOferta() {
       }
     }
 
+    // Detecção inteligente da Loja a partir da URL
+    if (url.includes('magazineluiza') || url.includes('onelink.me')) {
+      $('#inputChamada').value = '🛍️ Pegar no Magazine Luiza';
+    } else if (url.includes('amazon.')) {
+      $('#inputChamada').value = '📦 Pegar na Amazon';
+    } else if (url.includes('shopee.')) {
+      $('#inputChamada').value = '🟠 Pegar na Shopee';
+    } else if (url.includes('meli.la') || url.includes('mercadolivre')) {
+      $('#inputChamada').value = '👨‍👧‍👦 Pegar Promoção do Paizão';
+    }
+
     if (tituloExtraido) {
-      const tituloLimpo = tituloExtraido
+      let tituloLimpo = tituloExtraido
         .replace(/\s*\|\s*MercadoLivre.*$/i, '')
         .replace(/\s*\|\s*Mercado Livre.*$/i, '')
+        .replace(/\s*\|\s*Magazine Luiza.*$/i, '')
+        .replace(/^Magazine Luiza\s*\|\s*/i, '')
         .replace(/\s*\|\s*Perfil Social.*$/i, '')
         .replace(/^PAIZAODOSDESCONTOS\s*\|\s*/i, '')
         .trim();
 
-      $('#inputTitulo').value = tituloLimpo;
-      $('#inputSlug').value = gerarSlug(tituloLimpo);
-      
-      const cat = identificarCategoria(tituloLimpo + ' ' + url);
-      categoriaAtiva = cat;
-      renderizarToolbarEmojis(cat);
-      $('#inputHeadline').value = gerarHeadlinePadrao(cat);
+      if (tituloLimpo.includes('Não é possível') || tituloLimpo.includes('Acesso negado')) {
+        tituloLimpo = '';
+      }
+
+      if (!tituloLimpo && url.includes('/p/')) {
+        const parts = url.split('/p/')[0].split('/');
+        const slugProduct = parts[parts.length - 1];
+        if (slugProduct && slugProduct !== 'p') {
+          tituloLimpo = slugProduct.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+      }
+
+      if (tituloLimpo) {
+        $('#inputTitulo').value = tituloLimpo;
+        $('#inputSlug').value = gerarSlug(tituloLimpo);
+        
+        const cat = identificarCategoria(tituloLimpo + ' ' + url);
+        categoriaAtiva = cat;
+        renderizarToolbarEmojis(cat);
+        $('#inputHeadline').value = gerarHeadlinePadrao(cat);
+      }
     }
 
     if (imagemExtraida) {
