@@ -42,55 +42,40 @@ export default async function handler(req, res) {
       image = ogImg[1];
     }
 
-    // Extração de Preços (De e Por)
+    // Extração de Preços (De e Por) via aria-label oficial do Mercado Livre (100% Preciso)
+    function parseAriaPrice(str) {
+      if (!str) return '';
+      const reaisMatch = str.match(/([0-9\.\,]+)\s*reais?/i);
+      if (!reaisMatch) return '';
+      let reais = reaisMatch[1].replace(/\./g, '');
+      const centsMatch = str.match(/com\s*([0-9]+)\s*centavos?/i);
+      let centavos = centsMatch ? centsMatch[1] : '00';
+      if (centavos.length === 1) centavos += '0';
+      return `${reais},${centavos}`;
+    }
+
     let priceDe = '';
     let pricePor = '';
 
-    // 1. Preço 'De' (Riscado / Anterior)
-    const deTag = html.match(/<span[^>]*class="[^"]*andes-money-amount--previous[^"]*"[^>]*>[\s\S]*?<\/span>\s*<\/span>/i) ||
-                  html.match(/<s[^>]*>[\s\S]*?<\/s>/i) ||
-                  html.match(/<span[^>]*class="[^"]*ui-pdp-price__original-value[^"]*"[^>]*>[\s\S]*?<\/span>/i);
+    const antesAria = html.match(/aria-label=["']Antes:\s*([^"']+)["']/i);
+    if (antesAria && antesAria[1]) {
+      priceDe = parseAriaPrice(antesAria[1]);
+    }
 
-    if (deTag) {
-      const deFrac = deTag[0].match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
-      const deCents = deTag[0].match(/andes-money-amount__cents[^>]*>([0-9]+)<\/span>/i);
-      if (deFrac && deFrac[1]) {
-        let pDe = deFrac[1].replace(/\./g, '');
-        let cDe = deCents ? deCents[1] : '00';
-        if (cDe.length === 1) cDe += '0';
-        priceDe = `${pDe},${cDe}`;
+    const agoraAria = html.match(/aria-label=["']Agora:\s*([^"']+)["']/i);
+    if (agoraAria && agoraAria[1]) {
+      pricePor = parseAriaPrice(agoraAria[1]);
+    }
+
+    // Se não tinha "Agora:" (produto sem desconto ou formato simples)
+    if (!pricePor) {
+      const unicoAria = html.match(/aria-label=["']([0-9\.\,]+\s*reais?[^"']*)["']/i);
+      if (unicoAria && unicoAria[1]) {
+        pricePor = parseAriaPrice(unicoAria[1]);
       }
     }
 
-    // 2. Preço 'Por' (Preço Atual com Desconto)
-    // Extrai o bloco da segunda linha / linha principal sem vazar para o resto da página
-    const secondLine = html.match(/class="[^"]*ui-pdp-price__second-line[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
-                       html.match(/class="[^"]*ui-pdp-price__main-container[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-
-    const priceBlock = secondLine ? secondLine[1] : html;
-
-    // Pega estritamente a tag andes-money-amount do preço com desconto
-    const porTag = priceBlock.match(/<span[^>]*class="[^"]*andes-money-amount(?![^"]*previous)[^"]*"[^>]*>([\s\S]*?)<\/span>\s*<\/span>/i) ||
-                   priceBlock.match(/<span[^>]*class="[^"]*andes-money-amount[^"]*"[^>]*>([\s\S]*?)<\/span>\s*<\/span>/i);
-
-    if (porTag) {
-      const porFrac = porTag[0].match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
-      const porCents = porTag[0].match(/andes-money-amount__cents[^>]*>([0-9]+)<\/span>/i);
-      if (porFrac && porFrac[1]) {
-        let pPor = porFrac[1].replace(/\./g, '');
-        let cPor = porCents ? porCents[1] : '00';
-        if (cPor.length === 1) cPor += '0';
-        pricePor = `${pPor},${cPor}`;
-      }
-    } else {
-      const porFrac = priceBlock.match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
-      if (porFrac && porFrac[1]) {
-        let pPor = porFrac[1].replace(/\./g, '');
-        pricePor = `${pPor},00`;
-      }
-    }
-
-    // Se os dois preços forem iguais por erro de seletor, limpa o 'De'
+    // Se De e Por forem iguais, limpa o De
     if (priceDe && pricePor && priceDe === pricePor) {
       priceDe = '';
     }
