@@ -620,15 +620,10 @@
       </div>
     </div>
 
-    <div class="grid-2">
-      <div class="campo">
-        <label>Código da Oferta (/p/...)</label>
-        <input type="text" id="inputSlug" value="ar-condicionado-lg" placeholder="ex: ar-condicionado-lg">
-      </div>
-      <div class="campo">
-        <label>Foto do Produto (URL da Imagem)</label>
-        <input type="text" id="inputImg" value="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" placeholder="https://...">
-      </div>
+    <div class="campo">
+      <label>Foto do Produto (URL da Imagem)</label>
+      <input type="text" id="inputImg" value="https://http2.mlstatic.com/D_NQ_NP_880344-MLA99423241978_112025-O.webp" placeholder="https://...">
+      <input type="hidden" id="inputSlug" value="oferta">
     </div>
   </div>
 
@@ -646,18 +641,12 @@
       </div>
     </div>
 
-    <div class="acoes">
-      <button class="btn btn-salvar" id="btnSalvarPublicar" onclick="salvarEPublicar()" style="grid-column:span 2;padding:15px">
-        🚀 1º Passo: Salvar & Publicar no Site
-      </button>
-      <a id="btnBaixarFoto" class="btn btn-secundario disabled" href="#" target="_blank" download="produto.jpg">
-        📸 2º Passo: Baixar Imagem
+    <div class="acoes" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+      <a id="btnBaixarFoto" class="btn btn-secundario" href="#" target="_blank" download="produto.jpg" style="padding: 16px; font-size: 15px; font-weight: 700; border-radius: 12px;">
+        📸 1º Passo: Baixar Imagem
       </a>
-      <a id="btnTestarLink" class="btn btn-testar disabled" href="#" target="_blank" rel="noopener">
-        🧪 3º Passo: Testar Link ↗
-      </a>
-      <button class="btn btn-copiar disabled" id="btnCopiarPost" onclick="copiarPost()">
-        📋 4º Passo: Copiar Post para WhatsApp
+      <button class="btn btn-copiar" id="btnCopiarPost" onclick="copiarPost()" style="padding: 16px; font-size: 15px; font-weight: 700; border-radius: 12px;">
+        📋 2º Passo: Copiar Post
       </button>
     </div>
   </div>
@@ -997,7 +986,8 @@ function montarTexto() {
     blocoCupom = `\n🏷️ USE O CUPOM: ${cupom.toUpperCase()}`;
   }
 
-  const linkPaizao = `https://www.paizaodosdescontos.com.br/p?id=${slug}`;
+  const urlDigitada = $('#inputUrl').value.trim();
+  const linkProduto = urlDigitada || 'https://meli.la/...';
 
   return `${headline}
 
@@ -1006,7 +996,7 @@ ${titulo}
 ${linhaPreco}${blocoCupom}
 
 ${chamada}
-${linkPaizao}
+${linkProduto}
 
 🫵🏽 Participe do nosso grupo:
 https://www.paizaodosdescontos.com.br/grupos`;
@@ -1021,9 +1011,6 @@ function atualizarPreview() {
     $('#prevImg').src = img;
     $('#btnBaixarFoto').href = img;
   }
-
-  const slug = $('#inputSlug').value.trim() || 'oferta';
-  $('#btnTestarLink').href = `https://www.paizaodosdescontos.com.br/p?id=${slug}`;
 
   const agora = new Date();
   $('#prevHora').textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
