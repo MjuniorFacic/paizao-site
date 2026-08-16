@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       image = ogImg[1];
     }
 
-    // Extração de Preços (De e Por) via aria-label oficial do Mercado Livre (100% Preciso)
+    // Extração de Preços (De e Por) estritamente do produto principal (Ignora produtos relacionados)
     function parseAriaPrice(str) {
       if (!str) return '';
       const reaisMatch = str.match(/([0-9\.\,]+)\s*reais?/i);
@@ -57,19 +57,23 @@ export default async function handler(req, res) {
     let priceDe = '';
     let pricePor = '';
 
-    const antesAria = html.match(/aria-label=["']Antes:\s*([^"']+)["']/i);
+    // Isola o primeiro bloco de preço do anúncio principal (termina antes de parcelas / produtos relacionados)
+    const mainPriceMatch = html.match(/(?:class="[^"]*(?:poly-component__price|ui-pdp-price__main-container|ui-pdp-price)[^"]*"[^>]*>[\s\S]*?)(?:<\/div>\s*<\/div>|class="poly-component__installments"|class="ui-pdp-price__installments"|<form|<button)/i);
+    const mainBlock = mainPriceMatch ? mainPriceMatch[0] : html;
+
+    const antesAria = mainBlock.match(/aria-label=["']Antes:\s*([^"']+)["']/i);
     if (antesAria && antesAria[1]) {
       priceDe = parseAriaPrice(antesAria[1]);
     }
 
-    const agoraAria = html.match(/aria-label=["']Agora:\s*([^"']+)["']/i);
+    const agoraAria = mainBlock.match(/aria-label=["']Agora:\s*([^"']+)["']/i);
     if (agoraAria && agoraAria[1]) {
       pricePor = parseAriaPrice(agoraAria[1]);
     }
 
-    // Se não tinha "Agora:" (produto sem desconto ou formato simples)
+    // Se o produto não tem desconto ("De"), pega o preço único do anúncio principal
     if (!pricePor) {
-      const unicoAria = html.match(/aria-label=["']([0-9\.\,]+\s*reais?[^"']*)["']/i);
+      const unicoAria = mainBlock.match(/aria-label=["']([0-9\.\,]+\s*reais?[^"']*)["']/i);
       if (unicoAria && unicoAria[1]) {
         pricePor = parseAriaPrice(unicoAria[1]);
       }
