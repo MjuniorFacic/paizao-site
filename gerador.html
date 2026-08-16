@@ -1173,6 +1173,7 @@ async function buscarDadosOferta() {
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '🔍 Buscar';
+    habilitarPassos($('#inputImg').value);
     atualizarPreview();
   }
 }
@@ -1207,24 +1208,16 @@ function copiarPost() {
 }
 
 function desabilitarPassos() {
-  $('#btnBaixarFoto').classList.add('disabled');
-  $('#btnTestarLink').classList.add('disabled');
-  $('#btnTestarLink').removeAttribute('href');
-  $('#btnCopiarPost').classList.add('disabled');
-  $('#btnSalvarPublicar').classList.remove('sucesso');
-  $('#btnSalvarPublicar').textContent = '🚀 1º Passo: Salvar & Publicar no Site';
-  $('#btnSalvarPublicar').style.opacity = '1';
+  if ($('#btnBaixarFoto')) $('#btnBaixarFoto').classList.add('disabled');
+  if ($('#btnCopiarPost')) $('#btnCopiarPost').classList.add('disabled');
 }
 
-function habilitarPassos(slug, imgUrl) {
-  $('#btnBaixarFoto').classList.remove('disabled');
-  if (imgUrl) $('#btnBaixarFoto').href = imgUrl;
-  $('#btnTestarLink').classList.remove('disabled');
-  $('#btnTestarLink').href = `https://www.paizaodosdescontos.com.br/p?id=${slug}`;
-  $('#btnCopiarPost').classList.remove('disabled');
-  $('#btnSalvarPublicar').classList.add('sucesso');
-  $('#btnSalvarPublicar').innerHTML = '✅ 1º Passo: Publicado com Sucesso!';
-  $('#btnSalvarPublicar').style.opacity = '1';
+function habilitarPassos(imgUrl) {
+  if ($('#btnBaixarFoto')) {
+    $('#btnBaixarFoto').classList.remove('disabled');
+    if (imgUrl) $('#btnBaixarFoto').href = imgUrl;
+  }
+  if ($('#btnCopiarPost')) $('#btnCopiarPost').classList.remove('disabled');
 }
 
 function b64EncodeUnicode(str) {
