@@ -17,9 +17,14 @@
 <link rel="icon" href="../assets/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/favicon.png">
 
-<!-- REDIRECIONAMENTO ULTRA-INSTANTÂNEO (Executa no Head antes de desenhar a tela) -->
+<link rel="preconnect" href="https://raw.githubusercontent.com">
+<link rel="preconnect" href="https://api.github.com">
+<link rel="dns-prefetch" href="https://meli.la">
+<link rel="dns-prefetch" href="https://mercadolivre.com.br">
+
+<!-- REDIRECIONAMENTO ULTRA-INSTANTÂNEO (Executa no Head em Paralelo antes de desenhar a tela) -->
 <script>
-(async function() {
+(function() {
   try {
     const params = new URLSearchParams(location.search);
     let codigo = (params.get('id') || params.get('codigo') || '').trim().toLowerCase();
@@ -29,47 +34,50 @@
     }
     if (!codigo) return;
 
-    let destino = null;
-
-    // 1. Tenta pegar de ofertas.json local do Netlify sem cache
-    try {
-      const res = await fetch('/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
-      if (res.ok) {
-        const ofertas = await res.json();
-        const oferta = ofertas[codigo];
-        destino = (typeof oferta === 'string') ? oferta : (oferta && oferta.url ? oferta.url : null);
+    let redirecionado = false;
+    function redirecionar(url) {
+      if (url && !redirecionado) {
+        redirecionado = true;
+        location.replace(url);
       }
-    } catch(e) {}
+    }
 
-    // 2. Se o host ainda não atualizou, pega do GitHub Raw em tempo real
-    if (!destino) {
-      try {
-        const resGh = await fetch('https://raw.githubusercontent.com/MjuniorFacic/paizao-site/main/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
-        if (resGh.ok) {
-          const ofertasGh = await resGh.json();
-          const ofertaGh = ofertasGh[codigo];
-          destino = (typeof ofertaGh === 'string') ? ofertaGh : (ofertaGh && ofertaGh.url ? ofertaGh.url : null);
+    const t = Date.now();
+
+    // 1. Host local (Vercel)
+    fetch('/p/ofertas.json?t=' + t, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data[codigo]) {
+          const o = data[codigo];
+          redirecionar(typeof o === 'string' ? o : (o.url || null));
         }
-      } catch(e) {}
-    }
+      }).catch(() => {});
 
-    // 3. Fallback instantâneo direto da API do GitHub (zero cache)
-    if (!destino) {
-      try {
-        const resApi = await fetch('https://api.github.com/repos/MjuniorFacic/paizao-site/contents/p/ofertas.json?t=' + Date.now());
-        if (resApi.ok) {
-          const dataApi = await resApi.json();
-          const decoded = decodeURIComponent(atob(dataApi.content.replace(/\s/g, '')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-          const ofertasApi = JSON.parse(decoded);
-          const ofertaApi = ofertasApi[codigo];
-          destino = (typeof ofertaApi === 'string') ? ofertaApi : (ofertaApi && ofertaApi.url ? ofertaApi.url : null);
+    // 2. GitHub Raw em tempo real
+    fetch('https://raw.githubusercontent.com/MjuniorFacic/paizao-site/main/p/ofertas.json?t=' + t, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data[codigo]) {
+          const o = data[codigo];
+          redirecionar(typeof o === 'string' ? o : (o.url || null));
         }
-      } catch(e) {}
-    }
+      }).catch(() => {});
 
-    if (destino) {
-      location.replace(destino);
-    }
+    // 3. API Oficial do GitHub (zero cache)
+    fetch('https://api.github.com/repos/MjuniorFacic/paizao-site/contents/p/ofertas.json?t=' + t)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && data.content) {
+          const decoded = decodeURIComponent(atob(data.content.replace(/\s/g, '')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const ofertas = JSON.parse(decoded);
+          if (ofertas && ofertas[codigo]) {
+            const o = ofertas[codigo];
+            redirecionar(typeof o === 'string' ? o : (o.url || null));
+          }
+        }
+      }).catch(() => {});
+
   } catch(e) {}
 })();
 </script>
