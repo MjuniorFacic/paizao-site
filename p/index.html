@@ -41,7 +41,7 @@
       }
     } catch(e) {}
 
-    // 2. Se o Netlify ainda não atualizou, pega do GitHub Raw em tempo real
+    // 2. Se o host ainda não atualizou, pega do GitHub Raw em tempo real
     if (!destino) {
       try {
         const resGh = await fetch('https://raw.githubusercontent.com/MjuniorFacic/paizao-site/main/p/ofertas.json?t=' + Date.now(), { cache: 'no-store' });
@@ -49,6 +49,20 @@
           const ofertasGh = await resGh.json();
           const ofertaGh = ofertasGh[codigo];
           destino = (typeof ofertaGh === 'string') ? ofertaGh : (ofertaGh && ofertaGh.url ? ofertaGh.url : null);
+        }
+      } catch(e) {}
+    }
+
+    // 3. Fallback instantâneo direto da API do GitHub (zero cache)
+    if (!destino) {
+      try {
+        const resApi = await fetch('https://api.github.com/repos/MjuniorFacic/paizao-site/contents/p/ofertas.json?t=' + Date.now());
+        if (resApi.ok) {
+          const dataApi = await resApi.json();
+          const decoded = decodeURIComponent(atob(dataApi.content.replace(/\s/g, '')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+          const ofertasApi = JSON.parse(decoded);
+          const ofertaApi = ofertasApi[codigo];
+          destino = (typeof ofertaApi === 'string') ? ofertaApi : (ofertaApi && ofertaApi.url ? ofertaApi.url : null);
         }
       } catch(e) {}
     }
@@ -220,6 +234,19 @@ async function carregarOfertas(){
       if (resGh.ok) {
         const dadosGh = await resGh.json();
         ofertas = Object.assign(ofertas, dadosGh);
+      }
+    } catch (e) {}
+  }
+
+  // 3. Fallback direto da API do GitHub (zero cache)
+  if (!ofertas[codigo]) {
+    try {
+      const resApi = await fetch('https://api.github.com/repos/MjuniorFacic/paizao-site/contents/p/ofertas.json?t=' + Date.now());
+      if (resApi.ok) {
+        const dataApi = await resApi.json();
+        const decoded = decodeURIComponent(atob(dataApi.content.replace(/\s/g, '')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        const dadosApi = JSON.parse(decoded);
+        ofertas = Object.assign(ofertas, dadosApi);
       }
     } catch (e) {}
   }
