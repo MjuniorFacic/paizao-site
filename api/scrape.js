@@ -47,31 +47,47 @@ export default async function handler(req, res) {
     let pricePor = '';
 
     // 1. Preço 'De' (Riscado / Anterior)
-    const deMatch = html.match(/class="[^"]*andes-money-amount--previous[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
-                    html.match(/<s[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
-                    html.match(/class="[^"]*ui-pdp-price__original-value[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is);
-    const deCentsMatch = html.match(/class="[^"]*andes-money-amount--previous[^"]*"[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is) ||
-                         html.match(/<s[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is);
+    const deTag = html.match(/<span[^>]*class="[^"]*andes-money-amount--previous[^"]*"[^>]*>[\s\S]*?<\/span>\s*<\/span>/i) ||
+                  html.match(/<s[^>]*>[\s\S]*?<\/s>/i) ||
+                  html.match(/<span[^>]*class="[^"]*ui-pdp-price__original-value[^"]*"[^>]*>[\s\S]*?<\/span>/i);
 
-    if (deMatch && deMatch[1]) {
-      let pDe = deMatch[1].replace(/\./g, '');
-      let cDe = deCentsMatch ? deCentsMatch[1] : '00';
-      if (cDe.length === 1) cDe += '0';
-      priceDe = `${pDe},${cDe}`;
+    if (deTag) {
+      const deFrac = deTag[0].match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
+      const deCents = deTag[0].match(/andes-money-amount__cents[^>]*>([0-9]+)<\/span>/i);
+      if (deFrac && deFrac[1]) {
+        let pDe = deFrac[1].replace(/\./g, '');
+        let cDe = deCents ? deCents[1] : '00';
+        if (cDe.length === 1) cDe += '0';
+        priceDe = `${pDe},${cDe}`;
+      }
     }
 
     // 2. Preço 'Por' (Preço Atual com Desconto)
-    const porMatch = html.match(/class="[^"]*ui-pdp-price__second-line[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
-                     html.match(/class="[^"]*andes-money-amount--cents-superscript[^"]*"[^>]*>.*?andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/is) ||
-                     html.match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
-    const porCentsMatch = html.match(/class="[^"]*ui-pdp-price__second-line[^"]*"[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is) ||
-                          html.match(/class="[^"]*andes-money-amount--cents-superscript[^"]*"[^>]*>.*?andes-money-amount__cents[^>]*>([0-9]+)<\/span>/is);
+    // Extrai o bloco da segunda linha / linha principal sem vazar para o resto da página
+    const secondLine = html.match(/class="[^"]*ui-pdp-price__second-line[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+                       html.match(/class="[^"]*ui-pdp-price__main-container[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
 
-    if (porMatch && porMatch[1]) {
-      let pPor = porMatch[1].replace(/\./g, '');
-      let cPor = porCentsMatch ? porCentsMatch[1] : '';
-      if (cPor && cPor.length === 1) cPor += '0';
-      pricePor = cPor ? `${pPor},${cPor}` : `${pPor}`;
+    const priceBlock = secondLine ? secondLine[1] : html;
+
+    // Pega estritamente a tag andes-money-amount do preço com desconto
+    const porTag = priceBlock.match(/<span[^>]*class="[^"]*andes-money-amount(?![^"]*previous)[^"]*"[^>]*>([\s\S]*?)<\/span>\s*<\/span>/i) ||
+                   priceBlock.match(/<span[^>]*class="[^"]*andes-money-amount[^"]*"[^>]*>([\s\S]*?)<\/span>\s*<\/span>/i);
+
+    if (porTag) {
+      const porFrac = porTag[0].match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
+      const porCents = porTag[0].match(/andes-money-amount__cents[^>]*>([0-9]+)<\/span>/i);
+      if (porFrac && porFrac[1]) {
+        let pPor = porFrac[1].replace(/\./g, '');
+        let cPor = porCents ? porCents[1] : '00';
+        if (cPor.length === 1) cPor += '0';
+        pricePor = `${pPor},${cPor}`;
+      }
+    } else {
+      const porFrac = priceBlock.match(/andes-money-amount__fraction[^>]*>([0-9\.\,]+)<\/span>/i);
+      if (porFrac && porFrac[1]) {
+        let pPor = porFrac[1].replace(/\./g, '');
+        pricePor = `${pPor},00`;
+      }
     }
 
     // Se os dois preços forem iguais por erro de seletor, limpa o 'De'
