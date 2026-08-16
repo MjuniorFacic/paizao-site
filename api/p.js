@@ -1,4 +1,5 @@
-import ofertasLocais from '../p/ofertas.json' assert { type: 'json' };
+import fs from 'fs';
+import path from 'path';
 
 export default async function handler(req, res) {
   const { id, codigo } = req.query;
@@ -11,10 +12,16 @@ export default async function handler(req, res) {
   let destino = null;
 
   // 1. Tenta direto do ofertas.json embutido no servidor (0ms)
-  if (ofertasLocais && ofertasLocais[slug]) {
-    const o = ofertasLocais[slug];
-    destino = (typeof o === 'string') ? o : (o.url || null);
-  }
+  try {
+    const filePath = path.join(process.cwd(), 'p', 'ofertas.json');
+    if (fs.existsSync(filePath)) {
+      const ofertasLocais = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      if (ofertasLocais && ofertasLocais[slug]) {
+        const o = ofertasLocais[slug];
+        destino = (typeof o === 'string') ? o : (o.url || null);
+      }
+    }
+  } catch(e) {}
 
   // 2. Se for uma oferta recém-criada, consulta GitHub Raw em tempo real
   if (!destino) {
