@@ -667,7 +667,7 @@
 <script>
 const $ = s => document.querySelector(s);
 
-// Garante autenticação automática com a API do GitHub
+// Garante autenticação automática com o banco de dados do GitHub
 const _k1 = 'gho_0RrbUBcn6x';
 const _k2 = 'EhiXkLgZbfdnSl2byH4q2qJY7l';
 localStorage.setItem('gh_token', _k1 + _k2);
@@ -1022,6 +1022,9 @@ function atualizarPreview() {
     $('#btnBaixarFoto').href = img;
   }
 
+  const slug = $('#inputSlug').value.trim() || 'oferta';
+  $('#btnTestarLink').href = `https://paizaodosdescontos.com.br/p/${slug}`;
+
   const agora = new Date();
   $('#prevHora').textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
@@ -1206,41 +1209,25 @@ function toast(msg) {
 
 function copiarPost() {
   const texto = montarTexto();
+  const slug = $('#inputSlug').value.trim() || 'oferta';
+  const url = $('#inputUrl').value.trim();
+  const titulo = $('#inputTitulo').value.trim();
+  const de = $('#inputPrecoDe').value.trim();
+  const por = $('#inputPrecoPor').value.trim();
+
+  // Salva no histórico local do navegador
+  try {
+    let salvas = JSON.parse(localStorage.getItem('paizao_ofertas') || '{}');
+    salvas[slug] = { url, titulo, preco_de: de, preco_por: por, salvo_em: new Date().toISOString() };
+    localStorage.setItem('paizao_ofertas', JSON.stringify(salvas));
+  } catch(e) {}
+
   navigator.clipboard.writeText(texto).then(() => {
     toast('📋 Post copiado! Dê Ctrl+V na legenda da foto no WhatsApp!');
   }).catch(() => {
     toast('⚠️ Selecione e copie o texto manualmente.');
   });
 }
-
-function b64EncodeUnicode(str) {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-    return String.fromCharCode('0x' + p1);
-  }));
-}
-
-function b64DecodeUnicode(str) {
-  return decodeURIComponent(atob(str).split('').map(function(c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
-}
-
-async function salvarEPublicar() {
-  const btn = $('#btnSalvarPublicar');
-  const slug = $('#inputSlug').value.trim();
-  const url = $('#inputUrl').value.trim();
-  const titulo = $('#inputTitulo').value.trim();
-  const por = $('#inputPrecoPor').value.trim();
-  const de = $('#inputPrecoDe').value.trim();
-  const loja = $('#inputChamada').value.trim();
-
-  if (!slug || !url) {
-    toast('⚠️ Preencha o link e o código da oferta!');
-    return;
-  }
-
-  btn.textContent = '⏳ Publicando no Netlify...';
-  btn.style.opacity = '0.7';
 
 function desabilitarPassos() {
   $('#btnBaixarFoto').classList.add('disabled');
@@ -1263,6 +1250,18 @@ function habilitarPassos(slug, imgUrl) {
   $('#btnSalvarPublicar').style.opacity = '1';
 }
 
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode('0x' + p1);
+  }));
+}
+
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+
 async function salvarEPublicar() {
   const btn = $('#btnSalvarPublicar');
   const slug = $('#inputSlug').value.trim();
@@ -1278,7 +1277,7 @@ async function salvarEPublicar() {
     return;
   }
 
-  btn.textContent = '⏳ Gravando no GitHub...';
+  btn.textContent = '⏳ Publicando no Site...';
   btn.style.opacity = '0.7';
 
   // 1. Salva no navegador (localStorage)
