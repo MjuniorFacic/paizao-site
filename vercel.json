@@ -1,0 +1,25 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/p", "destination": "/api/p" },
+    { "source": "/p/:id*", "destination": "/api/p?id=:id*" },
+    { "source": "/grupos/:slug*", "destination": "/grupos/index.html" },
+    { "source": "/grupos", "destination": "/grupos/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/p/ofertas.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" }
+      ]
+    },
+    {
+      "source": "/p/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }
+      ]
+    }
+  ]
+}
