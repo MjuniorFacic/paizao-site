@@ -1088,7 +1088,7 @@ async function buscarDadosOferta() {
     try {
       const controllerV = new AbortController();
       const timeoutV = setTimeout(() => controllerV.abort(), 4500);
-      const resV = await fetch(`https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`, { signal: controllerV.signal });
+      const resV = await fetch(`https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`, { signal: controllerV.signal });
       clearTimeout(timeoutV);
       if (resV.ok) {
         const dataV = await resV.json();
