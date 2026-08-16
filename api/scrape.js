@@ -12,7 +12,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(url, {
+    let finalUrl = url;
+    let html = '';
+
+    // Se for link do AppsFlyer (Magazine Luiza onelink)
+    if (url.includes('onelink.me')) {
+      const resOnelink = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+        },
+        redirect: 'manual'
+      });
+      const loc = resOnelink.headers.get('location');
+      if (loc) finalUrl = loc;
+    }
+
+    const response = await fetch(finalUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -21,7 +36,7 @@ export default async function handler(req, res) {
       redirect: 'follow'
     });
 
-    const html = await response.text();
+    html = await response.text();
 
     // Extração de Título
     let title = '';
@@ -32,6 +47,15 @@ export default async function handler(req, res) {
     } else {
       const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
       if (titleMatch && titleMatch[1]) title = titleMatch[1];
+    }
+
+    // Se o título não veio no HTML (ex: Magalu com bloqueio Cloudflare), extrai do próprio slug da URL
+    if (!title && finalUrl.includes('/p/')) {
+      const parts = finalUrl.split('/p/')[0].split('/');
+      const slugProduct = parts[parts.length - 1];
+      if (slugProduct) {
+        title = slugProduct.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
     }
 
     // Extração de Imagem
