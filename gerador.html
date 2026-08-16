@@ -1069,10 +1069,14 @@ async function buscarDadosOferta() {
   status.textContent = 'Buscando dados da oferta...';
   status.style.color = '#0284c7';
 
-  // Limpa valores anteriores
+  // Limpa valores anteriores para não misturar produtos
+  $('#inputTitulo').value = '';
+  $('#inputSlug').value = '';
+  $('#inputImg').value = '';
   $('#inputPrecoDe').value = '';
   $('#inputPrecoPor').value = '';
   $('#inputCupom').value = '';
+  atualizarPreview();
 
   let tituloExtraido = '';
   let imagemExtraida = '';
@@ -1083,7 +1087,7 @@ async function buscarDadosOferta() {
     // 1. Tenta API rápida e direta do Microlink
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.priceDe.selector=s .andes-money-amount__fraction&data.centsDe.selector=s .andes-money-amount__cents&data.pricePor.selector=.andes-money-amount:not(s) .andes-money-amount__fraction&data.centsPor.selector=.andes-money-amount:not(s) .andes-money-amount__cents`;
       
       const resMicro = await fetch(microUrl, { signal: controller.signal });
@@ -1111,49 +1115,6 @@ async function buscarDadosOferta() {
       }
     } catch (e) {
       console.log('Microlink fallback...', e);
-    }
-
-    // 2. Se necessário, tenta proxy HTML para pegar dados
-    if (!tituloExtraido || !imagemExtraida) {
-      const proxies = [
-        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-      ];
-
-      for (const p of proxies) {
-        try {
-          const controllerP = new AbortController();
-          const timeoutP = setTimeout(() => controllerP.abort(), 5000);
-          const res = await fetch(p, { signal: controllerP.signal });
-          clearTimeout(timeoutP);
-          if (res.ok) {
-            let html = '';
-            if (p.includes('allorigins')) {
-              const data = await res.json();
-              html = data.contents || '';
-            } else {
-              html = await res.text();
-            }
-            if (html) {
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(html, 'text/html');
-              if (!tituloExtraido) {
-                tituloExtraido = doc.querySelector('meta[property="og:title"]')?.content ||
-                                 doc.querySelector('meta[name="title"]')?.content ||
-                                 doc.title || '';
-              }
-              if (!imagemExtraida) {
-                imagemExtraida = doc.querySelector('meta[property="og:image"]')?.content ||
-                                 doc.querySelector('meta[name="image"]')?.content ||
-                                 doc.querySelector('.ui-pdp-image')?.src || '';
-              }
-              break;
-            }
-          }
-        } catch (errProxy) {
-          console.log('Tentando próximo proxy...');
-        }
-      }
     }
 
     if (tituloExtraido) {
@@ -1184,15 +1145,19 @@ async function buscarDadosOferta() {
       $('#inputPrecoPor').value = precoPorExtraido;
     }
 
-    status.textContent = '✅ Dados carregados com sucesso!';
-    status.style.color = '#059669';
-    setTimeout(() => { status.textContent = ''; }, 3500);
+    if (tituloExtraido || imagemExtraida) {
+      status.textContent = '✅ Dados carregados com sucesso!';
+      status.style.color = '#059669';
+      setTimeout(() => { status.textContent = ''; }, 3500);
+    } else {
+      status.textContent = 'ℹ️ Insira o nome e valor abaixo para gerar o post';
+      status.style.color = '#eab308';
+    }
 
   } catch (err) {
     console.log('Erro geral:', err);
-    status.textContent = '✅ Pronto para personalizar!';
-    status.style.color = '#059669';
-    setTimeout(() => { status.textContent = ''; }, 3000);
+    status.textContent = 'ℹ️ Insira o nome e valor abaixo para gerar o post';
+    status.style.color = '#eab308';
   } finally {
     btn.classList.remove('loading');
     btn.textContent = '🔍 Buscar';
