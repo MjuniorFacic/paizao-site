@@ -1159,6 +1159,10 @@ async function buscarDadosOferta() {
       $('#inputImg').value = imagemExtraida;
     }
 
+    if (precoDeExtraido && precoPorExtraido && precoDeExtraido === precoPorExtraido) {
+      precoDeExtraido = '';
+    }
+
     if (precoDeExtraido) {
       $('#inputPrecoDe').value = precoDeExtraido;
     }
