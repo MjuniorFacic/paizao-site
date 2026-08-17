@@ -1075,33 +1075,42 @@ async function buscarDadosOferta() {
   let precoPorExtraido = '';
 
   try {
-    // 1. Tenta o nosso endpoint oficial com fallback automático
+    // 1. Tenta nossos endpoints em paralelo de altíssima velocidade
     try {
       const endpoints = [
         `https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`,
         `https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`
       ];
 
-      for (const ep of endpoints) {
+      const fetchPromises = endpoints.map(async (ep) => {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 3500);
         try {
-          const controllerV = new AbortController();
-          const timeoutV = setTimeout(() => controllerV.abort(), 4000);
-          const resV = await fetch(ep, { signal: controllerV.signal });
-          clearTimeout(timeoutV);
-          if (resV.ok) {
-            const dataV = await resV.json();
-            if (dataV.status === 'success' && dataV.data) {
-              tituloExtraido = dataV.data.title || '';
-              imagemExtraida = dataV.data.image || '';
-              precoDeExtraido = dataV.data.priceDe || '';
-              precoPorExtraido = dataV.data.pricePor || '';
-              if (tituloExtraido || imagemExtraida) break;
+          const r = await fetch(ep, { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (r.ok) {
+            const json = await r.json();
+            if (json.status === 'success' && json.data && (json.data.title || json.data.image)) {
+              return json.data;
             }
           }
-        } catch(errSingle) {}
-      }
+        } catch(e) {
+          clearTimeout(tid);
+        }
+        throw new Error('Falha');
+      });
+
+      try {
+        const winner = await Promise.any(fetchPromises);
+        if (winner) {
+          tituloExtraido = winner.title || '';
+          imagemExtraida = winner.image || '';
+          precoDeExtraido = winner.priceDe || '';
+          precoPorExtraido = winner.pricePor || '';
+        }
+      } catch(eAny) {}
     } catch(eV) {
-      console.log('Scraper fallback...', eV);
+      console.log('Scraper parallel fallback...', eV);
     }
 
     // 2. Se necessário, tenta Microlink
