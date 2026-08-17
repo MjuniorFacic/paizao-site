@@ -1,5 +1,17 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/ofertas",
+      "destination": "https://www.mercadolivre.com.br/social/pv20260814173820937/lists/e9052b24-42d8-4900-af21-0c2257830f79?matt_tool=47548116&&matt_word=whats",
+      "permanent": false
+    },
+    {
+      "source": "/loja",
+      "destination": "https://www.mercadolivre.com.br/social/pv20260814173820937/lists/e9052b24-42d8-4900-af21-0c2257830f79?matt_tool=47548116&&matt_word=whats",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/p", "destination": "/api/p" },
     { "source": "/p/:id*", "destination": "/api/p?id=:id*" },
