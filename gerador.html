@@ -1075,23 +1075,33 @@ async function buscarDadosOferta() {
   let precoPorExtraido = '';
 
   try {
-    // 1. Tenta o nosso próprio endpoint ilimitado da Vercel (100k requisições/dia)
+    // 1. Tenta o nosso endpoint oficial com fallback automático
     try {
-      const controllerV = new AbortController();
-      const timeoutV = setTimeout(() => controllerV.abort(), 4500);
-      const resV = await fetch(`https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`, { signal: controllerV.signal });
-      clearTimeout(timeoutV);
-      if (resV.ok) {
-        const dataV = await resV.json();
-        if (dataV.status === 'success' && dataV.data) {
-          tituloExtraido = dataV.data.title || '';
-          imagemExtraida = dataV.data.image || '';
-          precoDeExtraido = dataV.data.priceDe || '';
-          precoPorExtraido = dataV.data.pricePor || '';
-        }
+      const endpoints = [
+        `https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`,
+        `https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`
+      ];
+
+      for (const ep of endpoints) {
+        try {
+          const controllerV = new AbortController();
+          const timeoutV = setTimeout(() => controllerV.abort(), 4000);
+          const resV = await fetch(ep, { signal: controllerV.signal });
+          clearTimeout(timeoutV);
+          if (resV.ok) {
+            const dataV = await resV.json();
+            if (dataV.status === 'success' && dataV.data) {
+              tituloExtraido = dataV.data.title || '';
+              imagemExtraida = dataV.data.image || '';
+              precoDeExtraido = dataV.data.priceDe || '';
+              precoPorExtraido = dataV.data.pricePor || '';
+              if (tituloExtraido || imagemExtraida) break;
+            }
+          }
+        } catch(errSingle) {}
       }
     } catch(eV) {
-      console.log('Vercel Scraper fallback...', eV);
+      console.log('Scraper fallback...', eV);
     }
 
     // 2. Se necessário, tenta Microlink
