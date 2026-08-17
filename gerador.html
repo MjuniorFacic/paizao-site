@@ -987,7 +987,22 @@ function montarTexto() {
   }
 
   const urlDigitada = $('#inputUrl').value.trim();
-  const linkProduto = urlDigitada || 'https://meli.la/...';
+  let linkVitrine = 'https://www.paizaodosdescontos.com.br/ofertas/ml';
+  let textoVitrine = '🛍️ Veja todas as ofertas do Paizão:';
+
+  if (urlDigitada.includes('magazineluiza') || urlDigitada.includes('onelink.me') || chamada.includes('Magazine')) {
+    linkVitrine = 'https://www.paizaodosdescontos.com.br/ofertas/magalu';
+    textoVitrine = '🛍️ Veja todas as ofertas do Paizão no Magazine Luiza:';
+  } else if (urlDigitada.includes('kabum') || chamada.includes('KaBuM') || chamada.includes('Kabum')) {
+    linkVitrine = 'https://www.paizaodosdescontos.com.br/ofertas/kabum';
+    textoVitrine = '🛍️ Veja todas as ofertas do Paizão na KaBuM!:';
+  } else if (urlDigitada.includes('shopee') || chamada.includes('Shopee')) {
+    linkVitrine = 'https://www.paizaodosdescontos.com.br/ofertas/shopee';
+    textoVitrine = '🛍️ Veja todas as ofertas do Paizão na Shopee:';
+  } else if (urlDigitada.includes('meli.la') || urlDigitada.includes('mercadolivre')) {
+    linkVitrine = 'https://www.paizaodosdescontos.com.br/ofertas/ml';
+    textoVitrine = '🛍️ Veja todas as ofertas do Paizão no Mercado Livre:';
+  }
 
   return `${headline}
 
@@ -1001,8 +1016,8 @@ ${linkProduto}
 🫵🏽 Participe do nosso grupo:
 https://www.paizaodosdescontos.com.br/grupos
 
-🛍️ Veja todas as ofertas do Paizão:
-https://www.paizaodosdescontos.com.br/ofertas`;
+${textoVitrine}
+${linkVitrine}`;
 }
 
 function atualizarPreview() {

@@ -7,6 +7,46 @@
       "permanent": false
     },
     {
+      "source": "/ofertas/ml",
+      "destination": "https://www.mercadolivre.com.br/social/pv20260814173820937/lists/e9052b24-42d8-4900-af21-0c2257830f79?matt_tool=47548116&&matt_word=whats",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/ML",
+      "destination": "https://www.mercadolivre.com.br/social/pv20260814173820937/lists/e9052b24-42d8-4900-af21-0c2257830f79?matt_tool=47548116&&matt_word=whats",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/kabum",
+      "destination": "https://www.kabum.com.br",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/Kabum",
+      "destination": "https://www.kabum.com.br",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/magalu",
+      "destination": "https://www.magazineluiza.com.br",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/Magalu",
+      "destination": "https://www.magazineluiza.com.br",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/shopee",
+      "destination": "https://shopee.com.br",
+      "permanent": false
+    },
+    {
+      "source": "/ofertas/Shopee",
+      "destination": "https://shopee.com.br",
+      "permanent": false
+    },
+    {
       "source": "/loja",
       "destination": "https://www.mercadolivre.com.br/social/pv20260814173820937/lists/e9052b24-42d8-4900-af21-0c2257830f79?matt_tool=47548116&&matt_word=whats",
       "permanent": false
