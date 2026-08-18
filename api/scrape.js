@@ -66,14 +66,21 @@ export default async function handler(req, res) {
       }
     }
 
+    if (title) {
+      title = title.replace(/\s*:\s*Amazon\.com\.br.*$/i, '')
+                   .replace(/\s*\|\s*Amazon\.com\.br.*$/i, '')
+                   .trim();
+    }
+
     // Extração de Imagem (com suporte a imagens em alta definição da Amazon e ML)
     let image = '';
-    const amazonHires = html.match(/data-old-hires=["'](https:\/\/[^"']+)["']/i) ||
-                        html.match(/id=["']landingImage["'][^>]*src=["'](https:\/\/[^"']+)["']/i) ||
-                        html.match(/"hiRes":\s*"(https:\/\/[^"]+)"/i) ||
-                        html.match(/"large":\s*"(https:\/\/[^"]+)"/i);
-    if (amazonHires && amazonHires[1]) {
-      image = amazonHires[1];
+    const amazonImg = html.match(/data-old-hires=["'](https:\/\/[^"']+)["']/i) ||
+                      html.match(/id=["']landingImage["'][^>]*src=["'](https:\/\/[^"']+)["']/i) ||
+                      html.match(/data-a-dynamic-image=["']\{["'](https:\/\/[^"']+)["']/i) ||
+                      html.match(/"hiRes":\s*"(https:\/\/[^"]+)"/i) ||
+                      html.match(/"large":\s*"(https:\/\/[^"]+)"/i);
+    if (amazonImg) {
+      image = amazonImg[1] || amazonImg[2] || amazonImg[3] || amazonImg[4] || amazonImg[5] || '';
     } else {
       const ogImg = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
                     html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
