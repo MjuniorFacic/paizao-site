@@ -1175,9 +1175,10 @@ async function buscarDadosOferta() {
       }
 
       if (!tituloLimpo && url.includes('/p/')) {
-        const parts = url.split('/p/')[0].split('/');
+        const cleanPath = url.split('?')[0];
+        const parts = cleanPath.split('/p/')[0].split('/');
         const slugProduct = parts[parts.length - 1];
-        if (slugProduct && slugProduct !== 'p') {
+        if (slugProduct && slugProduct !== 'p' && !/^\d+$/.test(slugProduct) && slugProduct.length > 3) {
           tituloLimpo = slugProduct.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
       }
@@ -1212,6 +1213,9 @@ async function buscarDadosOferta() {
       status.textContent = '✅ Dados carregados com sucesso!';
       status.style.color = '#059669';
       setTimeout(() => { status.textContent = ''; }, 3500);
+    } else if (url.includes('shopee')) {
+      status.textContent = 'ℹ️ Link da Shopee detectado! Digite o nome e valor do produto.';
+      status.style.color = '#ea580c';
     } else {
       status.textContent = 'ℹ️ Insira o nome e valor abaixo para gerar o post';
       status.style.color = '#eab308';

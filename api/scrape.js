@@ -59,9 +59,10 @@ export default async function handler(req, res) {
 
     // Se o título não veio no HTML ou foi bloqueado pelo Cloudflare, extrai do próprio slug da URL
     if (!title && finalUrl.includes('/p/')) {
-      const parts = finalUrl.split('/p/')[0].split('/');
+      const cleanPath = finalUrl.split('?')[0];
+      const parts = cleanPath.split('/p/')[0].split('/');
       const slugProduct = parts[parts.length - 1];
-      if (slugProduct) {
+      if (slugProduct && !/^\d+$/.test(slugProduct) && slugProduct.length > 3) {
         title = slugProduct.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       }
     }
