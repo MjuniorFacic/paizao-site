@@ -1150,13 +1150,16 @@ async function buscarDadosOferta() {
     }
 
     // Detecção inteligente da Loja a partir da URL
-    if (url.includes('magazineluiza') || url.includes('onelink.me')) {
-      $('#inputChamada').value = '🛍️ Pegar no Magazine Luiza';
-    } else if (url.includes('amazon.')) {
+    const urlLower = url.toLowerCase();
+    if (urlLower.includes('amazon') || urlLower.includes('amzn') || urlLower.includes('a.co')) {
       $('#inputChamada').value = '📦 Pegar na Amazon';
-    } else if (url.includes('shopee.')) {
+    } else if (urlLower.includes('magazineluiza') || urlLower.includes('onelink.me') || urlLower.includes('magalu') || urlLower.includes('magazinevoce')) {
+      $('#inputChamada').value = '🛍️ Pegar no Magazine Luiza';
+    } else if (urlLower.includes('shopee') || urlLower.includes('shp.ee') || urlLower.includes('shope.ee')) {
       $('#inputChamada').value = '🟠 Pegar na Shopee';
-    } else if (url.includes('meli.la') || url.includes('mercadolivre')) {
+    } else if (urlLower.includes('kabum')) {
+      $('#inputChamada').value = '💻 Pegar na KaBuM!';
+    } else if (urlLower.includes('meli.la') || urlLower.includes('mercadolivre')) {
       $('#inputChamada').value = '👨‍👧‍👦 Pegar Promoção do Paizão';
     }
 
