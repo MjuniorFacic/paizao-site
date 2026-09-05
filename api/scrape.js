@@ -94,6 +94,7 @@ export default async function handler(req, res) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Cookie': 'lc-acbbr=pt_BR; i18n-prefs=BRL; sp-cdn="L5Z9:BR"',
         'Sec-Ch-Ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
         'Sec-Ch-Ua-Mobile': '?0',
         'Sec-Ch-Ua-Platform': '"Windows"',
@@ -235,6 +236,19 @@ export default async function handler(req, res) {
     if (amazonPriceDe && amazonPriceDe[1]) {
       const clean = amazonPriceDe[1].replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '');
       if (clean) priceDe = clean;
+    }
+
+    // Fallback de Preço Amazon: caso os seletores principais não tenham retornado por variação de layout
+    if (!pricePor && (finalUrl.includes('amazon.') || finalUrl.includes('amzn.to') || finalUrl.includes('a.co'))) {
+      const centerColMatch = html.match(/id="(?:centerCol|dp-container|desktop_buybox)"[\s\S]*?(?:id="desktop_buybox"|id="productDetails_feature_div"|<\/body)/i);
+      const searchHtml = centerColMatch ? centerColMatch[0] : html;
+
+      const anyPriceMatch = searchHtml.match(/class="[^"]*(?:a-price|a-color-price)[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">\s*(?:R\$\s*)?([0-9\.\,]+)\s*<\/span>/i) ||
+                            searchHtml.match(/<span class="a-offscreen">\s*(?:R\$\s*)?([0-9\.\,]+)\s*<\/span>/i) ||
+                            searchHtml.match(/(?:R\$\s*|BRL\s*)([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2})/i);
+      if (anyPriceMatch && anyPriceMatch[1]) {
+        pricePor = anyPriceMatch[1].replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '');
+      }
     }
 
     // 2. Preços do Mercado Livre (se não for Amazon)
