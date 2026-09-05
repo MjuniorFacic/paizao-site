@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador Shopee | Paizão dos Descontos</title>
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+  :root {
+    --shopee: #EE4D2D;
+    --shopee-dark: #D03E1F;
+    --shopee-light: #FFF1EE;
+    --shopee-border: #FFD8D0;
+    --navy: #002456;
+    --navy-2: #0A3374;
+    --amarelo: #FECB02;
+    --whats-green: #25D366;
+    --whats-dark: #075E54;
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --txt: #0F172A;
+    --txt-muted: #64748B;
+    --borda: #E2E8F0;
+    --raio: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+
+  body {
+    background: var(--bg);
+    color: var(--txt);
+    line-height: 1.5;
+    padding-bottom: 70px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1A0D08 0%, #002456 50%, #EE4D2D 130%);
+    color: #fff;
+    padding: 18px 24px;
+    box-shadow: 0 4px 20px rgba(238, 77, 45, 0.18);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-wrap {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-area img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2.5px solid var(--amarelo);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .tag-shopee {
+    background: #EE4D2D;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .logo-area h1 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-area p {
+    font-size: 13px;
+    opacity: 0.9;
+    color: #E2E8F0;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn {
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 8px 14px;
+    border-radius: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover {
+    background: #fff;
+    color: var(--navy);
+    transform: translateY(-1px);
+  }
+  .nav-btn.primary {
+    background: var(--amarelo);
+    color: var(--navy);
+    border-color: var(--amarelo);
+  }
+  .nav-btn.primary:hover {
+    background: #fff;
+    color: #000;
+  }
+
+  /* LAYOUT PRINCIPAL */
+  .layout-grid {
+    max-width: 1440px;
+    margin: 24px auto 0;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 360px 1.2fr 0.9fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 1200px) {
+    .layout-grid {
+      grid-template-columns: 340px 1fr;
+    }
+    .col-preview {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* PAINEL: FILA DE PRODUTOS */
+  .card-col {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  }
+
+  .fila-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .fila-header h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge-contador {
+    background: var(--shopee-light);
+    color: var(--shopee);
+    font-weight: 800;
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    border: 1px solid var(--shopee-border);
+  }
+
+  .busca-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--borda);
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: 0.2s;
+  }
+  .busca-input:focus {
+    border-color: var(--shopee);
+  }
+
+  .filtros-fila {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .tab-filtro {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: #F1F5F9;
+    color: var(--txt-muted);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.15s;
+  }
+  .tab-filtro:hover { background: #E2E8F0; color: var(--txt); }
+  .tab-filtro.ativa {
+    background: var(--navy);
+    color: #fff;
+  }
+
+  .lista-produtos {
+    max-height: 680px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+    scroll-behavior: smooth;
+  }
+
+  .lista-produtos::-webkit-scrollbar {
+    width: 6px;
+  }
+  .lista-produtos::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 99px;
+  }
+
+  .item-card {
+    background: #fff;
+    border: 1.5px solid var(--borda);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .item-card:hover {
+    border-color: var(--shopee);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(238, 77, 45, 0.12);
+  }
+  .item-card.ativo {
+    border-color: var(--shopee);
+    background: var(--shopee-light);
+    box-shadow: 0 0 0 2px var(--shopee);
+  }
+  .item-card.postado {
+    opacity: 0.65;
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+  }
+  .item-card.postado:hover {
+    opacity: 1;
+  }
+
+  .item-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .item-nome {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--txt);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .item-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .badge-preco {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--shopee);
+    background: #fff;
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--shopee-border);
+  }
+
+  .badge-vendas {
+    font-size: 11px;
+    font-weight: 700;
+    color: #B45309;
+    background: #FEF3C7;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  .badge-comissao {
+    font-size: 11px;
+    font-weight: 800;
+    color: #15803D;
+    background: #DCFCE7;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  .badge-postado {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #047857;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* COLUNA: FORMULÁRIO */
+  .form-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  .form-header-bar h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-produtos-btns {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-nav-prod {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: var(--txt);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-nav-prod:hover:not(:disabled) {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+  }
+  .btn-nav-prod:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .campo {
+    margin-bottom: 16px;
+  }
+
+  .campo label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .campo input, .campo select, .campo textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--borda);
+    border-radius: 10px;
+    font-size: 13.5px;
+    color: var(--txt);
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fff;
+  }
+  .campo input:focus, .campo select:focus {
+    border-color: var(--shopee);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  /* EMOJIS & TEMPLATES */
+  .chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .chip-btn {
+    font-size: 11.5px;
+    font-weight: 600;
+    background: #F8FAFC;
+    color: #475569;
+    border: 1px solid #CBD5E1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .chip-btn:hover {
+    background: var(--shopee-light);
+    color: var(--shopee);
+    border-color: var(--shopee-border);
+  }
+
+  /* PREVIEW WHATSAPP */
+  .whats-card {
+    background: #EFEAE2;
+    background-image: radial-gradient(#d1c7b7 1px, transparent 1px);
+    background-size: 20px 20px;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+  }
+
+  .whats-bubble {
+    background: #FFFFFF;
+    border-radius: 12px 12px 12px 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    padding: 8px;
+    max-width: 100%;
+    position: relative;
+  }
+
+  .foto-preview {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #F1F5F9;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .foto-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .foto-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--shopee);
+    z-index: 5;
+  }
+
+  .spinner-mini {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(238, 77, 45, 0.2);
+    border-top-color: var(--shopee);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .legenda-whats {
+    padding: 10px 6px 4px 6px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #111B21;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .whats-meta {
+    text-align: right;
+    font-size: 10.5px;
+    color: #667781;
+    padding-right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  /* BOTÕES DE AÇÃO */
+  .acoes-principais {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn-acao {
+    padding: 15px 12px;
+    border-radius: 12px;
+    font-size: 14.5px;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-baixar {
+    background: #F1F5F9;
+    color: var(--navy);
+    border: 1.5px solid #CBD5E1;
+  }
+  .btn-baixar:hover {
+    background: #E2E8F0;
+    transform: translateY(-2px);
+  }
+
+  .btn-copiar {
+    background: var(--whats-green);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  }
+  .btn-copiar:hover {
+    background: #20BD5A;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+  }
+
+  .btn-proximo-grande {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    background: var(--navy);
+    color: #fff;
+    padding: 13px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-proximo-grande:hover {
+    background: var(--shopee);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #0F172A;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 99px;
+    font-size: 13.5px;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* MODAIS (API SHOPEE / IMPORTADOR CSV) */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 999;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-box h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .modal-close {
+    float: right;
+    font-size: 22px;
+    color: #94A3B8;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+  .modal-close:hover { color: #000; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-wrap">
+    <div class="logo-area">
+      <img src="assets/logo.png" alt="Paizão dos Descontos">
+      <div>
+        <h1>
+          Paizão dos Descontos
+          <span class="tag-shopee">🟠 Modo Shopee</span>
+        </h1>
+        <p>Gerador Inteligente de Posts e Fila de Ofertas para WhatsApp</p>
+      </div>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="abrirModalCsv()">📁 Importar CSV</button>
+      <button class="nav-btn" onclick="abrirModalDownloadFotos()" style="color:#C2410C;background:#FFF1EE;border-color:#FDBA74;font-weight:700">📸 Baixar Fotos em Lote</button>
+      <button class="nav-btn" onclick="abrirModalApi()">🔑 Configurar API</button>
+      <a href="gerador.html" class="nav-btn primary">💛 Gerador Mercado Livre / Amazon ↗</a>
+    </div>
+  </div>
+</header>
+
+<main class="layout-grid">
+  
+  <!-- COLUNA 1: FILA DE OFERTAS DO CSV -->
+  <section class="card-col">
+    <div class="fila-header">
+      <h2>
+        <span>📦 Fila Shopee</span>
+      </h2>
+      <span class="badge-contador" id="badgeContador">44 Ofertas</span>
+    </div>
+
+    <input type="text" class="busca-input" id="inputBuscaFila" placeholder="🔍 Filtrar produtos por nome..." oninput="filtrarFila()">
+
+    <div class="filtros-fila">
+      <button class="tab-filtro ativa" onclick="mudarFiltro('todos', this)">Todos (<span id="countTodos">44</span>)</button>
+      <button class="tab-filtro" onclick="mudarFiltro('pendentes', this)">⏳ Pendentes (<span id="countPendentes">44</span>)</button>
+      <button class="tab-filtro" onclick="mudarFiltro('postados', this)">✅ Postados (<span id="countPostados">0</span>)</button>
+      <button class="tab-filtro" onclick="ordenarPor('comissao')">💰 + Comissão</button>
+      <button class="tab-filtro" onclick="ordenarPor('vendas')">🔥 + Vendidos</button>
+    </div>
+
+    <div class="lista-produtos" id="containerListaProdutos">
+      <!-- Itens renderizados dinamicamente via JS -->
+    </div>
+  </section>
+
+  <!-- COLUNA 2: FORMULÁRIO DO POST ATIVO -->
+  <section class="card-col">
+    <div class="form-header-bar">
+      <h2>
+        <span>⚙️ Dados do Post</span>
+        <span style="font-size:12px;font-weight:700;color:var(--shopee)" id="lblIndiceAtual">#1 de 44</span>
+      </h2>
+      <div class="nav-produtos-btns">
+        <button type="button" class="btn-nav-prod" id="btnProdAnt" onclick="navegarProduto(-1)">◀ Anterior</button>
+        <button type="button" class="btn-nav-prod" id="btnProdProx" onclick="navegarProduto(1)">Próximo ▶</button>
+      </div>
+    </div>
+
+    <!-- CAMPO DE BUSCA AVULSA DE LINK SHOPEE -->
+    <div class="campo" style="background:#FFF7ED;border:1.5px solid #FFEDD5;border-radius:12px;padding:12px 14px;margin-bottom:18px">
+      <label style="color:#C2410C;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;margin-bottom:6px">
+        <span>🔗 Buscar Oferta Avulsa por Link</span>
+        <span id="statusBuscaAvulsa" style="font-size:11.5px;font-weight:700"></span>
+      </label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="inputUrlAvulsa" placeholder="Cole aqui o link (ex: https://s.shopee.com.br/... ou link do produto)" style="background:#fff;border:1.5px solid #FDBA74;border-radius:10px;padding:9px 12px;font-size:13.5px;width:100%">
+        <button type="button" id="btnBuscarAvulso" onclick="buscarLinkAvulso()" style="background:var(--shopee);color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:13.5px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:0.2s">
+          <span>🔍 Buscar</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>
+        <span>1. Headline (Benefício em Caixa Alta)</span>
+        <span style="font-size:11px;color:#0284C7;cursor:pointer" onclick="sugerirHeadlineAutomatica()">✨ Gerar Automática</span>
+      </label>
+      <input type="text" id="inputHeadline" value="👟 CONFORTO E ESTILO PARA SEU DIA A DIA">
+      
+      <!-- Sugestões Rápidas de Headline -->
+      <div class="chips-row" id="chipsHeadlines">
+        <span class="chip-btn" onclick="setHeadline('👟 CONFORTO E ESTILO PARA SEU DIA A DIA')">👟 Tênis & Moda</span>
+        <span class="chip-btn" onclick="setHeadline('🏋️ PERFORMANCE E QUALIDADE PARA SEUS TREINOS')">🏋️ Treino/Academia</span>
+        <span class="chip-btn" onclick="setHeadline('⚡ PRATICIDADE E POTÊNCIA PARA O SEU LAR')">⚡ Ferramentas/Casa</span>
+        <span class="chip-btn" onclick="setHeadline('🍳 REVOLUÇÃO E PRATICIDADE NA SUA COZINHA')">🍳 Cozinha</span>
+        <span class="chip-btn" onclick="setHeadline('📱 TECNOLOGIA DE PONTA COM PREÇO BAIXO')">📱 Tech</span>
+        <span class="chip-btn" onclick="setHeadline('💣 BOMBA! ACHADINHO IMPERDÍVEL NA SHOPEE')">💣 Achadinho</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>
+        <span>2. Nome do Produto</span>
+        <span style="font-size:11px;color:#0284C7;cursor:pointer" onclick="limparTitulo()">✂️ Encurtar Título</span>
+      </label>
+      <input type="text" id="inputTitulo" value="">
+    </div>
+
+    <div class="grid-2">
+      <div class="campo">
+        <label>Preço "De" (R$ Opcional)</label>
+        <input type="text" id="inputPrecoDe" placeholder="ex: 99,90">
+      </div>
+      <div class="campo">
+        <label>Preço "Por" (R$)</label>
+        <input type="text" id="inputPrecoPor" placeholder="ex: 63,90">
+      </div>
+    </div>
+
+    <div class="campo" style="background:#F8FAFC;padding:10px 12px;border-radius:10px;border:1px solid #E2E8F0">
+      <label style="margin-bottom:0;cursor:pointer">
+        <span style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="chkProvaSocial" checked onchange="atualizarPreview()" style="width:auto;cursor:pointer">
+          <span>Incluir Prova Social de Vendas (ex: <i>🔥 Mais de 10 mil vendidos!</i>)</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="campo">
+      <label>3. Cupom de Desconto Shopee (Opcional)</label>
+      <input type="text" id="inputCupom" placeholder="ex: ACHADOS10, FRETEGRATIS (deixe em branco se não tiver)">
+      <div class="chips-row">
+        <span class="chip-btn" onclick="setCupom('FRETEGRATIS')">🎟️ FRETEGRATIS</span>
+        <span class="chip-btn" onclick="setCupom('SHOPEE10')">🎟️ SHOPEE10</span>
+        <span class="chip-btn" onclick="setCupom('')" style="color:#DC2626">✕ Sem Cupom</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>4. Chamada do Link</label>
+      <input type="text" id="inputChamada" value="🟠 Pegar na Shopee">
+      <div class="chips-row">
+        <span class="chip-btn" onclick="setChamada('🟠 Pegar na Shopee')">🟠 Pegar na Shopee</span>
+        <span class="chip-btn" onclick="setChamada('🛍️ Pegar Oferta na Shopee')">🛍️ Pegar Oferta na Shopee</span>
+        <span class="chip-btn" onclick="setChamada('👉 Ver Oferta na Shopee')">👉 Ver Oferta na Shopee</span>
+        <span class="chip-btn" onclick="setChamada('👨‍👧‍👦 Promoção do Paizão')">👨‍👧‍👦 Promoção do Paizão</span>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label>5. Link de Afiliado (Curto Shopee)</label>
+      <input type="text" id="inputLinkAfiliado" placeholder="https://s.shopee.com.br/...">
+    </div>
+
+    <div class="campo">
+      <label>
+        <span>6. URL da Imagem (HD)</span>
+        <span style="font-size:11px;color:#0284C7;cursor:pointer" onclick="recarregarImagemHD()">🔄 Recarregar HD</span>
+      </label>
+      <input type="text" id="inputImg" placeholder="https://down-br.img.susercontent.com/...">
+    </div>
+  </section>
+
+  <!-- COLUNA 3: PREVIEW DO WHATSAPP & AÇÕES -->
+  <section class="card-col col-preview">
+    <div class="form-header-bar">
+      <h2>📱 Preview WhatsApp</h2>
+      <span style="font-size:11px;color:#15803D;font-weight:700" id="lblComissaoAtiva">💰 Ganho: R$ 18,53</span>
+    </div>
+
+    <div class="whats-card">
+      <div class="whats-bubble">
+        <div class="foto-preview">
+          <img id="prevImg" src="assets/favicon.png" alt="Produto">
+          <div class="foto-loading" id="fotoLoading" style="display:none">
+            <div class="spinner-mini"></div>
+            <span>Buscando imagem HD...</span>
+          </div>
+        </div>
+        <div class="legenda-whats" id="prevTexto"></div>
+        <div class="whats-meta">
+          <span id="prevHora">19:30</span>
+          <span>✓✓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="acoes-principais">
+      <a id="btnBaixarFoto" class="btn-acao btn-baixar" href="#" target="_blank" download="produto-shopee.jpg">
+        📸 1º Baixar Foto
+      </a>
+      <button type="button" class="btn-acao btn-copiar" id="btnCopiarPost" onclick="copiarPost()">
+        📋 2º Copiar Post
+      </button>
+      <button type="button" class="btn-proximo-grande" onclick="irParaProximoNaoPostado()">
+        Próximo Não Postado ⏭️
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<!-- TOAST DE NOTIFICAÇÃO -->
+<div class="toast" id="toast">
+  <span>✅</span>
+  <span id="toastMsg">Post copiado com sucesso!</span>
+</div>
+
+<!-- MODAL: IMPORTADOR DE CSV -->
+<div class="modal-overlay" id="modalCsv">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharModalCsv()">✕</button>
+    <h3>📁 Importar Novo CSV da Shopee</h3>
+    <p style="font-size:13.5px;color:#64748B;margin-bottom:18px">
+      Selecione um novo arquivo de relatório exportado do Programa de Afiliados da Shopee (ex: <code>Links_Shopee.csv</code>).
+    </p>
+
+    <div style="border:2px dashed #CBD5E1;border-radius:12px;padding:28px;text-align:center;cursor:pointer;background:#F8FAFC" onclick="$('#fileInputCsv').click()">
+      <div style="font-size:32px;margin-bottom:8px">📄</div>
+      <b style="font-size:14px;color:var(--navy);display:block">Clique para escolher o arquivo CSV</b>
+      <span style="font-size:12px;color:#64748B">ou arraste o arquivo aqui</span>
+      <input type="file" id="fileInputCsv" accept=".csv" style="display:none" onchange="processarArquivoCsv(event)">
+    </div>
+
+    <!-- AVISO DE DOWNLOAD AUTOMÁTICO DE FOTOS -->
+    <div style="margin-top:16px;background:#FFF7ED;border:1px solid #FFEDD5;border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <b style="font-size:13px;color:#9A3412;display:block">📸 Baixar fotos da lista para seu computador?</b>
+        <span style="font-size:11.5px;color:#C2410C">Salva todas as fotos em <code>D:\Users\Mauro\Pictures\PaizaoDosDescontos</code></span>
+      </div>
+      <button type="button" class="nav-btn" onclick="fecharModalCsv();abrirModalDownloadFotos()" style="background:#EE4D2D;color:#fff;border:none;font-weight:700;font-size:12.5px;padding:8px 14px;white-space:nowrap">Baixar Fotos</button>
+    </div>
+
+    <div style="margin-top:16px;text-align:right">
+      <button class="nav-btn primary" onclick="fecharModalCsv()" style="padding:10px 18px">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DOWNLOAD DE FOTOS EM LOTE -->
+<div class="modal-overlay" id="modalDownloadFotos">
+  <div class="modal-box" style="max-width:540px">
+    <button class="modal-close" onclick="fecharModalDownloadFotos()">✕</button>
+    <h3>📸 Baixar Todas as Fotos para Pasta Local</h3>
+    <p style="font-size:13px;color:#64748B;margin-bottom:16px">
+      Baixe em alta resolução as fotos de todas as <b><span id="txtTotalFotosLote">100</span> ofertas</b> da lista diretamente para o seu computador.
+    </p>
+
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:12px;color:#64748B;margin-bottom:4px">Pasta de Destino Recomendada:</div>
+      <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:12.5px;color:#0F172A">
+        📁 D:\Users\Mauro\Pictures\PaizaoDosDescontos
+      </div>
+    </div>
+
+    <!-- ÁREA DE PROGRESSO (visível durante o download) -->
+    <div id="progressoLoteArea" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;margin-bottom:6px">
+        <span id="txtStatusLote" style="color:var(--shopee)">Iniciando download...</span>
+        <span id="txtPorcentagemLote" style="color:#166534">0%</span>
+      </div>
+      <div style="height:10px;background:#E2E8F0;border-radius:99px;overflow:hidden">
+        <div id="barraProgressoLote" style="height:100%;width:0%;background:linear-gradient(90deg, #EE4D2D, #16A34A);transition:width 0.2s"></div>
+      </div>
+      <div id="txtItemAtualLote" style="font-size:11.5px;color:#64748B;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+    </div>
+
+    <!-- OPÇÃO 1: NAVEGADOR COM FILE SYSTEM ACCESS API -->
+    <button type="button" id="btnSalvarDiretoPasta" class="nav-btn primary" onclick="executarDownloadNavegadorDireto()" style="width:100%;padding:14px;font-size:14px;font-weight:800;justify-content:center;margin-bottom:8px">
+      📁 1. Escolher Pasta e Salvar Fotos Diretamente
+    </button>
+    <div style="font-size:11.5px;color:#64748B;text-align:center;margin-bottom:16px">
+      O navegador solicitará a confirmação da pasta <code>PaizaoDosDescontos</code> uma única vez.
+    </div>
+
+    <div style="border-top:1px solid #E2E8F0;padding-top:14px;display:flex;flex-direction:column;gap:8px">
+      <!-- OPÇÃO 2: SCRIPT .BAT NO WINDOWS -->
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#FFF7ED;border:1px solid #FFEDD5;border-radius:10px;padding:10px 12px">
+        <div>
+          <b style="font-size:12.5px;color:#9A3412;display:block">⚡ Opção 2: Script Windows (.BAT) com 1 Clique</b>
+          <span style="font-size:11px;color:#C2410C">Baixa 100% no terminal sem limite de memória.</span>
+        </div>
+        <button type="button" class="nav-btn" onclick="abrirInstrucoesBat()" style="font-size:12px;padding:6px 12px;white-space:nowrap">Como Usar</button>
+      </div>
+
+      <!-- OPÇÃO 3: PACOTE ZIP -->
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px">
+        <div>
+          <b style="font-size:12.5px;color:#334155;display:block">📦 Opção 3: Baixar Pacote (.ZIP)</b>
+          <span style="font-size:11px;color:#64748B">Gera um arquivo ZIP com todas as imagens organizadas.</span>
+        </div>
+        <button type="button" id="btnGerarZip" class="nav-btn" onclick="executarDownloadZip()" style="font-size:12px;padding:6px 12px;white-space:nowrap">Gerar ZIP</button>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;text-align:right">
+      <button class="nav-btn" onclick="fecharModalDownloadFotos()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIGURAÇÃO DA API SHOPEE (GRAPHQL) -->
+<div class="modal-overlay" id="modalApi">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharModalApi()">✕</button>
+    <h3>🔑 Credenciais Shopee Open API</h3>
+    <p style="font-size:13px;color:#64748B;margin-bottom:14px">
+      Assim que a Shopee aprovar sua solicitação (prazo de 24h), insira seu <b>App ID</b> e <b>Secret Key</b> abaixo.
+    </p>
+
+    <div class="campo">
+      <label>App ID</label>
+      <input type="text" id="inputAppId" placeholder="ex: 12345678">
+    </div>
+
+    <div class="campo">
+      <label>Secret Key</label>
+      <input type="password" id="inputSecretKey" placeholder="Sua Secret Key da Shopee">
+    </div>
+
+    <div style="background:#FFF1EE;border:1px solid #FFD8D0;border-radius:10px;padding:12px;font-size:12px;color:#C2410C;margin-bottom:16px">
+      ℹ️ Suas chaves são armazenadas localmente no seu próprio navegador para sua segurança.
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="nav-btn" onclick="fecharModalApi()">Cancelar</button>
+      <button class="nav-btn primary" onclick="salvarCredenciaisApi()">Salvar Chaves</button>
+    </div>
+  </div>
+</div>
+
+<script src="shopee_produtos.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+// Estado Global da Aplicação
+let produtos = (typeof window.SHOPEE_PRODUTOS_INICIAIS !== 'undefined' && Array.isArray(window.SHOPEE_PRODUTOS_INICIAIS)) ? window.SHOPEE_PRODUTOS_INICIAIS : [];
+let produtoAtualIndex = 0;
+let filtroAtual = 'todos';
+let postadosSet = new Set(JSON.parse(localStorage.getItem('shopee_postados') || '[]'));
+const cacheImagens = JSON.parse(localStorage.getItem('shopee_cache_imagens') || '{}');
+
+/* BANCO DE EMOJIS E HEADLINES INTELIGENTES */
+function identificarCategoriaShopee(texto) {
+  const t = (texto || '').toLowerCase();
+  if (t.match(/umidificador|difusor|aromatizador|aroma|essencia|climatizador|ventilador|ar condicionado|purificador/)) return 'aroma';
+  if (t.match(/cozinha|processador|triturador|forma|air fryer|airfryer|silicone|chaleira|sanduicheira|panela|marmita|pote|liquidificador|batedeira|mixer|facas|escorredor|garrafa|copo/)) return 'cozinha';
+  if (t.match(/whey|creatina|suplemento|proteina|bcaa|glutamina|pre treino|pasta de amendoim|vitamina/)) return 'suplementos';
+  if (t.match(/academia|top|calca|calça|short|dry fit|fitness|suplex|bermuda|treino|legging|regata/)) return 'fitness';
+  if (t.match(/tenis|tênis|calçado|calcado|sapato|corrida|sneaker|caminhada|sandalia|chinelo|moletom|jaqueta|camisa|vestido|camiseta/)) return 'tenis';
+  if (t.match(/parafusadeira|furadeira|ferramenta|nivel|laser|trena|maleta|alicate|chave|vonder|makita|solda/)) return 'ferramentas';
+  if (t.match(/mop|balde|limpeza|lavadora|pressao|percarbonato|varal|casa|aspirador|robo|lixeira|toalha|lencol|almofada/)) return 'limpeza';
+  if (t.match(/computador|gamer|mouse|teclado|fone|headset|bluetooth|power bank|carregador|cabo|led|ring light|smartwatch|relogio|celular|suporte celular|camera|inova/)) return 'tech';
+  if (t.match(/cabelo|secador|prancha|chapinha|escova|maquiagem|skin care|perfume|barbeador|depilador|creme|serum/)) return 'beleza';
+  if (t.match(/massageador|patinete|pesca|cooler|chuveiro|moto|carro|organizador|porta joias|sombrinha|guarda chuva/)) return 'utilidades';
+  return 'geral';
+}
+
+const BANCO_HEADLINES_SHOPEE = {
+  aroma: [
+    '🌿 CONFORTO E BEM-ESTAR PARA SEU AMBIENTE',
+    '💨 AR PURO E REFRESCÂNCIA PARA SUA CASA',
+    '✨ AMBIENTE ACONCHEGANTE E CHEIROSO',
+    '💣 ACHADINHO IMPERDÍVEL NA SHOPEE'
+  ],
+  cozinha: [
+    '🍳 PRATICIDADE E ECONOMIA PARA SUA COZINHA',
+    '⚡ REVOLUÇÃO E AGILIDADE NO PREPARO',
+    '🍽️ FACILIDADE MÁXIMA NA SUA COZINHA',
+    '💣 ACHADINHO IMPERDÍVEL NA SHOPEE'
+  ],
+  fitness: [
+    '🏋️ PERFORMANCE E QUALIDADE PARA SEUS TREINOS',
+    '🔥 ESTILO E CONFORTO PARA TREINAR PESADO',
+    '💯 ZERO TRANSPARÊNCIA E MÁXIMA SEGURANÇA',
+    '👟 MODA FITNESS COM PREÇO IMBATÍVEL'
+  ],
+  suplementos: [
+    '💪 PERFORMANCE E RESULTADOS PARA SEUS TREINOS',
+    '⚡ ENERGIA E RECUPERAÇÃO MUSCULAR MÁXIMA',
+    '🥇 QUALIDADE PURA PARA O SEU SHAKE',
+    '🔥 SUPLEMENTAÇÃO DE ALTO NÍVEL'
+  ],
+  tenis: [
+    '👟 CONFORTO E ESTILO PARA SEU DIA A DIA',
+    '🏃 PISADA LEVE E AMORTECIMENTO PREMIUM',
+    '🔥 TÊNIS MODERNO COM PREÇO BAIXO',
+    '💣 ACHADINHO IMPERDÍVEL NA SHOPEE'
+  ],
+  ferramentas: [
+    '⚡ POTÊNCIA E PRECISÃO PARA SEUS PROJETOS',
+    '🛠️ FERRAMENTA ROBUSTA PARA O SEU DIA A DIA',
+    '🔩 PRATICIDADE E QUALIDADE PROFISSIONAL',
+    '💣 SUPER OFERTA EM FERRAMENTAS'
+  ],
+  limpeza: [
+    '🏠 PRATICIDADE E EFICIÊNCIA PARA SUA CASA',
+    '✨ LIMPEZA SEM ESFORÇO E COM RAPIDEZ',
+    '🧹 SUA CASA LIMPA COM MUITO MAIS FACILIDADE',
+    '💣 ACHADINHO DE CASA IMPERDÍVEL'
+  ],
+  tech: [
+    '📱 TECNOLOGIA DE PONTA COM SUPER DESCONTO',
+    '⚡ INOVAÇÃO E PRATICIDADE NO SEU DIA A DIA',
+    '🎮 PERFORMANCE E QUALIDADE ELEVADA',
+    '💣 ACHADINHO TECH NA SHOPEE'
+  ],
+  beleza: [
+    '✨ CUIDADO PESSOAL E BELEZA COM PREÇO BAIXO',
+    '💄 SEU VISUAL IMPECÁVEL TODOS OS DIAS',
+    '🌸 AUTOESTIMA E CUIDADO QUE VOCÊ MERECE',
+    '💣 SUPER ACHADINHO DE BELEZA'
+  ],
+  utilidades: [
+    '💣 SUPER ACHADINHO DO PAIZÃO NA SHOPEE',
+    '⚡ PRATICIDADE QUE RESOLVE SEU DIA A DIA',
+    '🔥 PRODUTO SUCESSO DE VENDAS NA SHOPEE',
+    '🛍️ OPORTUNIDADE IMPERDÍVEL NA SHOPEE'
+  ],
+  geral: [
+    '🛍️ OPORTUNIDADE IMPERDÍVEL NA SHOPEE',
+    '💣 SUPER ACHADINHO DO PAIZÃO NA SHOPEE',
+    '🔥 PROMOÇÃO ESPECIAL COM DESCONTO REAL',
+    '⭐ SUCESSO DE VENDAS NA SHOPEE'
+  ]
+};
+
+function gerarHeadlineShopee(cat) {
+  const lista = BANCO_HEADLINES_SHOPEE[cat] || BANCO_HEADLINES_SHOPEE.geral;
+  return lista[0];
+}
+
+function renderizarChipsHeadlines(cat) {
+  const lista = BANCO_HEADLINES_SHOPEE[cat] || BANCO_HEADLINES_SHOPEE.geral;
+  const container = $('#chipsHeadlines');
+  if (!container) return;
+  container.innerHTML = lista.map(h => `
+    <span class="chip-btn" onclick="setHeadline('${h.replace(/'/g, "\\'")}')">${h}</span>
+  `).join('');
+}
+
+/* CARREGAMENTO INICIAL */
+async function inicializar() {
+  // 1. Tenta carregar CSV previamente importado pelo usuário
+  const salvoCsv = localStorage.getItem('shopee_csv_produtos_v2');
+  if (salvoCsv) {
+    try {
+      const parsed = JSON.parse(salvoCsv);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        produtos = parsed;
+      }
+    } catch(e) {}
+  }
+
+  // 2. Se não houver CSV em cache ou o array estiver vazio, usa a base oficial
+  if (!produtos || produtos.length === 0) {
+    try {
+      const res = await fetch('shopee_produtos.json');
+      if (res.ok) {
+        produtos = await res.json();
+      }
+    } catch(e) {
+      console.warn('Erro ao carregar shopee_produtos.json local, fallback ativo', e);
+    }
+  }
+
+  // Limpa cache de imagens de erro antigas
+  Object.keys(cacheImagens).forEach(k => {
+    if (cacheImagens[k] && cacheImagens[k].includes('deo.shopeemobile.com')) {
+      delete cacheImagens[k];
+    }
+  });
+  localStorage.setItem('shopee_cache_imagens', JSON.stringify(cacheImagens));
+
+  // Carrega credenciais da API salvas
+  $('#inputAppId').value = localStorage.getItem('shopee_app_id') || '';
+  $('#inputSecretKey').value = localStorage.getItem('shopee_secret_key') || '';
+
+  renderizarFila();
+  if (produtos.length > 0) {
+    selecionarProduto(0);
+  }
+}
+
+/* RENDERIZAÇÃO DA FILA DE PRODUTOS */
+function renderizarFila() {
+  const container = $('#containerListaProdutos');
+  container.innerHTML = '';
+
+  const busca = ($('#inputBuscaFila').value || '').toLowerCase().trim();
+  let visiveis = 0;
+  let pendentesCount = 0;
+  let postadosCount = 0;
+
+  produtos.forEach((p, idx) => {
+    const isPostado = postadosSet.has(p.itemId || p.id || String(idx));
+    if (isPostado) postadosCount++; else pendentesCount++;
+
+    // Filtros
+    if (filtroAtual === 'pendentes' && isPostado) return;
+    if (filtroAtual === 'postados' && !isPostado) return;
+    if (busca && !p.title.toLowerCase().includes(busca)) return;
+
+    visiveis++;
+    const card = document.createElement('div');
+    card.className = `item-card ${idx === produtoAtualIndex ? 'ativo' : ''} ${isPostado ? 'postado' : ''}`;
+    card.setAttribute('data-index', idx);
+    card.onclick = () => selecionarProduto(idx);
+
+    card.innerHTML = `
+      <div class="item-top">
+        <span class="item-nome">${p.title}</span>
+        ${isPostado ? '<span class="badge-postado">✓ Postado</span>' : ''}
+      </div>
+      <div class="item-badges">
+        <span class="badge-preco">R$ ${p.price}</span>
+        ${p.sales ? `<span class="badge-vendas">🔥 ${p.sales}</span>` : ''}
+        ${p.commission ? `<span class="badge-comissao">💰 ${p.commission}</span>` : ''}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  $('#countTodos').textContent = produtos.length;
+  $('#countPendentes').textContent = pendentesCount;
+  $('#countPostados').textContent = postadosCount;
+  $('#badgeContador').textContent = `${visiveis} de ${produtos.length}`;
+}
+
+/* SELEÇÃO E PREENCHIMENTO DO PRODUTO ATIVO */
+async function selecionarProduto(index) {
+  if (index < 0 || index >= produtos.length) return;
+  produtoAtualIndex = index;
+
+  const p = produtos[index];
+  $('#lblIndiceAtual').textContent = `#${index + 1} de ${produtos.length}`;
+
+  // Título e Categoria
+  $('#inputTitulo').value = p.title;
+  const cat = identificarCategoriaShopee(p.title);
+  $('#inputHeadline').value = gerarHeadlineShopee(cat);
+  renderizarChipsHeadlines(cat);
+
+  // Preços
+  let precoFormatado = p.price ? p.price.replace(/[^\d,.]/g, '').trim() : '';
+  if (p.price && p.price.includes('mil')) {
+    precoFormatado = '1.100,00';
+  }
+  $('#inputPrecoPor').value = precoFormatado;
+  $('#inputPrecoDe').value = '';
+
+  // Links
+  $('#inputLinkAfiliado').value = p.offerUrl || p.offer_url || '';
+  $('#lblComissaoAtiva').textContent = `💰 Ganho: ${p.commission || 'Comissão Shopee'}`;
+
+  // Atualiza controles de navegação
+  $('#btnProdAnt').disabled = (index === 0);
+  $('#btnProdProx').disabled = (index === produtos.length - 1);
+
+  // Destaque visual na lista lateral e rolagem automática para acompanhar
+  let cardAtivo = null;
+  $$('.item-card').forEach((el) => {
+    const isAtivo = (el.getAttribute('data-index') == String(index));
+    el.classList.toggle('ativo', isAtivo);
+    if (isAtivo) cardAtivo = el;
+  });
+
+  if (cardAtivo) {
+    cardAtivo.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'nearest'
+    });
+  }
+
+  // Busca de Imagem em Alta Resolução (com cache)
+  await buscarImagemProduto(p);
+
+  atualizarPreview();
+}
+
+/* BUSCA DE OFERTA AVULSA POR LINK DA SHOPEE */
+async function buscarLinkAvulso() {
+  const urlInput = $('#inputUrlAvulsa');
+  const url = (urlInput.value || '').trim();
+  if (!url) {
+    urlInput.focus();
+    return;
+  }
+
+  const btn = $('#btnBuscarAvulso');
+  const status = $('#statusBuscaAvulsa');
+  const originalBtn = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  btn.innerHTML = '<span>⏳ Buscando...</span>';
+  status.textContent = 'Buscando foto HD e dados...';
+  status.style.color = 'var(--shopee)';
+
+  try {
+    const endpoints = [
+      `${window.location.origin}/api/scrape?url=${encodeURIComponent(url)}`,
+      `https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`,
+      `https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`
+    ];
+
+    let achou = null;
+    for (const ep of endpoints) {
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 6000);
+        const r = await fetch(ep, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (r.ok) {
+          const json = await r.json();
+          if (json.status === 'success' && json.data && (json.data.title || json.data.image)) {
+            achou = json.data;
+            break;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Fallback Microlink se necessário
+    if (!achou || !achou.image) {
+      try {
+        const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}`;
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 5000);
+        const r = await fetch(microUrl, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (r.ok) {
+          const data = await r.json();
+          const img = data?.data?.image?.url;
+          const tit = data?.data?.title;
+          if (img && !img.includes('deo.shopeemobile.com')) {
+            achou = achou || {};
+            achou.image = img;
+            if (!achou.title && tit) achou.title = tit;
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (achou) {
+      if (achou.title) {
+        $('#inputTitulo').value = achou.title.replace(/\s*\|\s*Shopee\s*Brasil.*$/i, '').trim();
+        const cat = identificarCategoriaShopee(achou.title);
+        $('#inputHeadline').value = gerarHeadlineShopee(cat);
+      }
+      if (achou.image) {
+        $('#inputImg').value = achou.image;
+        $('#prevImg').src = achou.image;
+        $('#btnBaixarFoto').href = achou.image;
+        // Salva no cache
+        cacheImagens[url] = achou.image;
+        localStorage.setItem('shopee_cache_imagens', JSON.stringify(cacheImagens));
+      }
+      if (achou.pricePor) {
+        $('#inputPrecoPor').value = achou.pricePor;
+      }
+      if (achou.priceDe) {
+        $('#inputPrecoDe').value = achou.priceDe;
+      }
+
+      $('#inputLinkAfiliado').value = url;
+      atualizarPreview();
+      status.textContent = '✓ Foto HD e dados carregados!';
+      status.style.color = '#15803D';
+      toast('🎉 Produto da Shopee carregado com sucesso!');
+    } else {
+      status.textContent = 'Link identificado. Complete os detalhes manualmente.';
+      status.style.color = '#DC2626';
+      $('#inputLinkAfiliado').value = url;
+      atualizarPreview();
+    }
+  } catch (err) {
+    status.textContent = 'Erro ao buscar dados da oferta.';
+    status.style.color = '#DC2626';
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = originalBtn;
+  }
+}
+
+/* BUSCADOR DE IMAGEM EM ALTA RESOLUÇÃO */
+async function buscarImagemProduto(p) {
+  const id = p.itemId || p.id || p.productUrl || p.offerUrl;
+  const loading = $('#fotoLoading');
+
+  // 1. Se o produto já possui imagem oficial embutida
+  if (p.image && !p.image.includes('deo.shopeemobile.com')) {
+    $('#inputImg').value = p.image;
+    $('#prevImg').src = p.image;
+    $('#btnBaixarFoto').href = p.image;
+    return;
+  }
+
+  // 2. Se já está no cache local do navegador
+  if (cacheImagens[id] && !cacheImagens[id].includes('deo.shopeemobile.com')) {
+    $('#inputImg').value = cacheImagens[id];
+    $('#prevImg').src = cacheImagens[id];
+    $('#btnBaixarFoto').href = cacheImagens[id];
+    return;
+  }
+
+  const productUrl = p.productUrl || p.product_url || p.offerUrl || p.offer_url;
+  if (!productUrl) return;
+
+  loading.style.display = 'flex';
+
+  try {
+    let imgAchada = '';
+
+    // 3. Tenta endpoints de scraping de alta velocidade
+    const endpoints = [
+      `${window.location.origin}/api/scrape?url=${encodeURIComponent(productUrl)}`,
+      `https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(productUrl)}`,
+      `https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(productUrl)}`
+    ];
+
+    for (const ep of endpoints) {
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 5000);
+        const r = await fetch(ep, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (r.ok) {
+          const json = await r.json();
+          if (json.status === 'success' && json.data?.image && !json.data.image.includes('deo.shopeemobile.com')) {
+            imgAchada = json.data.image;
+            break;
+          }
+        }
+      } catch(e) {}
+    }
+
+    // 4. Fallback com Microlink filtrando imagens de erro
+    if (!imgAchada) {
+      try {
+        const microUrl = `https://api.microlink.io?url=${encodeURIComponent(productUrl)}`;
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 5000);
+        const r = await fetch(microUrl, { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (r.ok) {
+          const data = await r.json();
+          const img = data?.data?.image?.url;
+          if (img && !img.includes('deo.shopeemobile.com')) {
+            imgAchada = img;
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (imgAchada) {
+      cacheImagens[id] = imgAchada;
+      p.image = imgAchada;
+      localStorage.setItem('shopee_cache_imagens', JSON.stringify(cacheImagens));
+      $('#inputImg').value = imgAchada;
+      $('#prevImg').src = imgAchada;
+      $('#btnBaixarFoto').href = imgAchada;
+    }
+  } catch (e) {
+    console.log('Erro ao buscar imagem HD:', e);
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+function recarregarImagemHD() {
+  const p = produtos[produtoAtualIndex];
+  if (p) {
+    const id = p.itemId || p.id;
+    delete cacheImagens[id];
+    buscarImagemProduto(p);
+  }
+}
+
+/* MONTAGEM DO TEXTO DO POST PARA WHATSAPP */
+function montarTextoPost() {
+  const headline = ($('#inputHeadline').value || '').trim();
+  const titulo = ($('#inputTitulo').value || '').trim();
+  const de = ($('#inputPrecoDe').value || '').trim();
+  const por = ($('#inputPrecoPor').value || '').trim();
+  const cupom = ($('#inputCupom').value || '').trim();
+  const chamada = ($('#inputChamada').value || '🟠 Pegar na Shopee').trim();
+  const linkAfiliado = ($('#inputLinkAfiliado').value || '').trim() || 'https://s.shopee.com.br/...';
+  const incluirProva = $('#chkProvaSocial').checked;
+
+  const pAtual = produtos[produtoAtualIndex];
+  let provaStr = '';
+  if (incluirProva && pAtual && pAtual.sales) {
+    let salesLimpo = pAtual.sales.replace('mil+', ' mil').replace('+', '');
+    provaStr = ` (🔥 Mais de ${salesLimpo} vendidos!)`;
+  }
+
+  let linhaPreco = '';
+  if (de && por) {
+    linhaPreco = `De R$ ${de} por R$ ${por}${provaStr}`;
+  } else if (por) {
+    linhaPreco = `Por R$ ${por}${provaStr}`;
+  } else {
+    linhaPreco = `Confira o preço especial no link${provaStr}`;
+  }
+
+  let blocoCupom = '';
+  if (cupom) {
+    blocoCupom = `\n⚠️ Cupom: ${cupom.toUpperCase()}`;
+  }
+
+  return `${headline}
+
+${titulo}
+
+${linhaPreco}${blocoCupom}
+
+${chamada}
+${linkAfiliado}
+
+🫵🏽 Participe do nosso grupo:
+https://www.paizaodosdescontos.com.br/grupos
+
+🛍️ Veja todas as ofertas do Paizão na Shopee:
+https://www.paizaodosdescontos.com.br/ofertas/shopee`;
+}
+
+function atualizarPreview() {
+  const texto = montarTextoPost();
+  $('#prevTexto').textContent = texto;
+
+  const img = $('#inputImg').value.trim();
+  if (img) {
+    $('#prevImg').src = img;
+    $('#btnBaixarFoto').href = img;
+  }
+
+  const agora = new Date();
+  $('#prevHora').textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+/* EVENTOS DOS INPUTS */
+['inputHeadline', 'inputTitulo', 'inputPrecoDe', 'inputPrecoPor', 'inputCupom', 'inputChamada', 'inputLinkAfiliado', 'inputImg'].forEach(id => {
+  $(`#${id}`).addEventListener('input', atualizarPreview);
+});
+
+$('#inputTitulo').addEventListener('input', () => {
+  const cat = identificarCategoriaShopee($('#inputTitulo').value);
+  renderizarChipsHeadlines(cat);
+});
+
+// Auto-busca ao colar ou pressionar Enter no link avulso
+const inpAvulso = $('#inputUrlAvulsa');
+if (inpAvulso) {
+  inpAvulso.addEventListener('paste', () => setTimeout(buscarLinkAvulso, 60));
+  inpAvulso.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      buscarLinkAvulso();
+    }
+  });
+}
+
+/* PROCESSADOR DE CSV IMPORTADO */
+function processarArquivoCsv(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const raw = evt.target.result;
+    const lines = raw.split(/\r?\n/);
+    if (lines.length < 2) {
+      alert('Arquivo CSV vazio ou formato inválido.');
+      return;
+    }
+
+    // 1. Detecta delimitador (vírgula, ponto-e-vírgula ou tab)
+    const firstLine = lines[0];
+    let sep = ',';
+    if (firstLine.includes('\t')) {
+      sep = '\t';
+    } else if ((firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length) {
+      sep = ';';
+    }
+
+    // Função de extração de colunas CSV respeitando aspas e delimitador dinâmico
+    function parseCsvLine(str) {
+      if (sep === '\t') return str.split('\t').map(v => v.replace(/^"|"$/g, '').trim());
+      const regex = new RegExp(`(?:${sep}|\\n|^)("(?:(?:"")*[^"]*)*"|[^"${sep}\\n]*|(?:\\n|$))`, 'g');
+      const res = [];
+      let match;
+      while ((match = regex.exec(str)) !== null) {
+        let val = match[1];
+        if (val && val.startsWith('"') && val.endsWith('"')) {
+          val = val.substring(1, val.length - 1).replace(/""/g, '"');
+        }
+        res.push((val || '').trim());
+        if (regex.lastIndex >= str.length) break;
+      }
+      return res;
+    }
+
+    // Identificação dinâmica de colunas a partir do cabeçalho
+    const headerCols = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+
+    // 1. Loja (identificada primeiro para não conflitar com a busca de 'nome')
+    let colShop = headerCols.findIndex(h => h.includes('loja') || h.includes('shop') || h.includes('vendedor') || h.includes('seller'));
+
+    // 2. Título / Produto (exclui explicitamente qualquer coluna de loja ou ID)
+    let colTitle = headerCols.findIndex((h, idx) =>
+      idx !== colShop &&
+      (h.includes('produto') || h.includes('product') || h.includes('título') || h.includes('titulo') || h.includes('title') || h === 'item name' || h.includes('item name')) &&
+      !h.includes('id') && !h.includes('url') && !h.includes('link')
+    );
+    if (colTitle === -1) {
+      colTitle = headerCols.findIndex((h, idx) =>
+        idx !== colShop && h.includes('item') && !h.includes('id') && !h.includes('url') && !h.includes('link')
+      );
+    }
+    if (colTitle === -1) {
+      colTitle = headerCols.findIndex((h, idx) =>
+        idx !== colShop && h.includes('nome') && !h.includes('id') && !h.includes('url') && !h.includes('link')
+      );
+    }
+
+    // 3. Demais colunas
+    let colItemId = headerCols.findIndex(h => (h.includes('item') && h.includes('id')) || h.includes('itemid') || h.includes('código') || h === 'id');
+    let colPrice = headerCols.findIndex(h => h.includes('price') || h.includes('preço') || h.includes('preco') || h.includes('valor'));
+    let colSales = headerCols.findIndex(h => h.includes('sales') || h.includes('vendas') || h.includes('vendidos'));
+    let colCommRate = headerCols.findIndex(h => h.includes('commission rate') || h.includes('taxa de comiss') || h.includes('taxa'));
+    let colComm = headerCols.findIndex(h => (h.includes('commission') || h.includes('comissão') || h.includes('comissao') || h.includes('ganho')) && !h.includes('rate') && !h.includes('taxa'));
+    let colProdUrl = headerCols.findIndex(h => (h.includes('product') || h.includes('produto')) && (h.includes('url') || h.includes('link')));
+    let colOfferUrl = headerCols.findIndex(h => (h.includes('offer') || h.includes('afiliado') || h.includes('oferta') || h.includes('curto') || h.includes('short')) && (h.includes('url') || h.includes('link')));
+    let colImg = headerCols.findIndex(h => h.includes('image') || h.includes('imagem') || h.includes('foto') || h.includes('cover') || h.includes('thumbnail'));
+
+    // Fallbacks para índices padrão caso o relatório venha sem cabeçalhos textuais
+    if (colItemId === -1) colItemId = 0;
+    if (colTitle === -1) colTitle = (colShop === 1 ? 2 : 1);
+    if (colPrice === -1) colPrice = 2;
+    if (colSales === -1) colSales = 3;
+    if (colShop === -1) colShop = 4;
+    if (colCommRate === -1) colCommRate = 5;
+    if (colComm === -1) colComm = 6;
+    if (colProdUrl === -1) colProdUrl = 7;
+    if (colOfferUrl === -1) colOfferUrl = 8;
+
+    const novosProdutos = [];
+    for (let i = 1; i < lines.length; i++) {
+      let l = lines[i].trim();
+      if (!l) continue;
+
+      const cols = parseCsvLine(l);
+      if (cols.length >= 2) {
+        let tTitle = cols[colTitle] || '';
+        let tShop = (colShop !== -1 ? cols[colShop] : '') || '';
+
+        if (tTitle) {
+          const item = {
+            itemId: cols[colItemId] || '',
+            title: tTitle,
+            price: cols[colPrice] || '',
+            sales: cols[colSales] || '',
+            shopName: tShop,
+            commissionRate: cols[colCommRate] || '',
+            commission: cols[colComm] || '',
+            productUrl: cols[colProdUrl] || '',
+            offerUrl: cols[colOfferUrl] || ''
+          };
+
+          if (colImg !== -1 && cols[colImg]) {
+            item.image = cols[colImg];
+          }
+
+          novosProdutos.push(item);
+        }
+      }
+    }
+
+    if (novosProdutos.length > 0) {
+      produtos = novosProdutos;
+      localStorage.setItem('shopee_csv_produtos_v2', JSON.stringify(novosProdutos));
+      renderizarFila();
+      selecionarProduto(0);
+      fecharModalCsv();
+      toast(`✅ ${novosProdutos.length} produtos carregados com sucesso do CSV!`);
+    } else {
+      alert('Não foi possível reconhecer o padrão das colunas da Shopee neste CSV.');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// Inicializa a aplicação
+window.addEventListener('DOMContentLoaded', inicializar);
+
+/* COPIAR POST E MARCAR COMO POSTADO */
+function copiarPost() {
+  const texto = montarTextoPost();
+  const p = produtos[produtoAtualIndex];
+  const id = p ? (p.itemId || p.id || String(produtoAtualIndex)) : String(produtoAtualIndex);
+
+  navigator.clipboard.writeText(texto).then(() => {
+    postadosSet.add(id);
+    localStorage.setItem('shopee_postados', JSON.stringify(Array.from(postadosSet)));
+    renderizarFila();
+    toast('📋 Post copiado com sucesso! Foto pronta para envio!');
+  }).catch(() => {
+    toast('⚠️ Selecione o texto e copie manualmente.');
+  });
+}
+
+function navegarProduto(delta) {
+  selecionarProduto(produtoAtualIndex + delta);
+}
+
+function irParaProximoNaoPostado() {
+  const prox = produtos.findIndex((p, i) => i > produtoAtualIndex && !postadosSet.has(p.itemId || p.id || String(i)));
+  if (prox !== -1) {
+    selecionarProduto(prox);
+  } else {
+    // Procura do início
+    const inicio = produtos.findIndex((p, i) => !postadosSet.has(p.itemId || p.id || String(i)));
+    if (inicio !== -1) {
+      selecionarProduto(inicio);
+      toast('🔄 Voltando aos itens pendentes do início!');
+    } else {
+      toast('🎉 Parabéns! Você já gerou os posts de todas as ofertas da lista!');
+    }
+  }
+}
+
+/* FUNÇÕES DE APOIO */
+function setHeadline(txt) {
+  $('#inputHeadline').value = txt;
+  atualizarPreview();
+}
+
+function setChamada(txt) {
+  $('#inputChamada').value = txt;
+  atualizarPreview();
+}
+
+function setCupom(txt) {
+  $('#inputCupom').value = txt;
+  atualizarPreview();
+}
+
+function sugerirHeadlineAutomatica() {
+  const tit = $('#inputTitulo').value;
+  const cat = identificarCategoriaShopee(tit);
+  $('#inputHeadline').value = gerarHeadlineShopee(cat);
+  renderizarChipsHeadlines(cat);
+  atualizarPreview();
+  toast('✨ Headline sugerida com base na categoria!');
+}
+
+function limparTitulo() {
+  let t = $('#inputTitulo').value;
+  t = t.replace(/[\u4e00-\u9fa5]/g, '') // remove chineses comuns
+       .replace(/[\/\\]/g, ' ')
+       .replace(/\s+/g, ' ')
+       .trim();
+  $('#inputTitulo').value = t;
+  atualizarPreview();
+}
+
+function mudarFiltro(tipo, btn) {
+  filtroAtual = tipo;
+  $$('.tab-filtro').forEach(b => b.classList.remove('ativa'));
+  btn.classList.add('ativa');
+  renderizarFila();
+}
+
+function filtrarFila() {
+  renderizarFila();
+}
+
+function ordenarPor(criterio) {
+  if (criterio === 'comissao') {
+    produtos.sort((a, b) => {
+      const vA = Number((a.commission || '0').replace(/[^\d]/g, '')) || 0;
+      const vB = Number((b.commission || '0').replace(/[^\d]/g, '')) || 0;
+      return vB - vA;
+    });
+    toast('💰 Ordenado por Maior Comissão em R$');
+  } else if (criterio === 'vendas') {
+    produtos.sort((a, b) => {
+      const vA = Number((a.sales || '0').replace('mil+', '000').replace(/[^\d]/g, '')) || 0;
+      const vB = Number((b.sales || '0').replace('mil+', '000').replace(/[^\d]/g, '')) || 0;
+      return vB - vA;
+    });
+    toast('🔥 Ordenado por Produtos Mais Vendidos');
+  }
+  renderizarFila();
+  selecionarProduto(0);
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  $('#toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* MODAIS */
+function abrirModalCsv() { $('#modalCsv').classList.add('open'); }
+function fecharModalCsv() { $('#modalCsv').classList.remove('open'); }
+function abrirModalApi() { $('#modalApi').classList.add('open'); }
+function fecharModalApi() { $('#modalApi').classList.remove('open'); }
+
+function abrirModalDownloadFotos() {
+  $('#txtTotalFotosLote').textContent = produtos.length;
+  $('#modalDownloadFotos').classList.add('open');
+}
+function fecharModalDownloadFotos() {
+  $('#modalDownloadFotos').classList.remove('open');
+}
+
+/* 1. DOWNLOAD DIRETO PARA PASTA (FILE SYSTEM ACCESS API) */
+async function executarDownloadNavegadorDireto() {
+  if (!('showDirectoryPicker' in window)) {
+    alert('Seu navegador atual não suporta a seleção direta de pastas locais. Por favor, use a Opção 2 (Script Windows .BAT) ou Opção 3 (Baixar ZIP).');
+    return;
+  }
+
+  let dirHandle;
+  try {
+    dirHandle = await window.showDirectoryPicker({ id: 'paizao_shopee', mode: 'readwrite' });
+  } catch (e) {
+    return; // Usuário cancelou
+  }
+
+  const progressoArea = $('#progressoLoteArea');
+  const txtStatus = $('#txtStatusLote');
+  const txtPorcentagem = $('#txtPorcentagemLote');
+  const barra = $('#barraProgressoLote');
+  const txtItem = $('#txtItemAtualLote');
+  const btn = $('#btnSalvarDiretoPasta');
+
+  progressoArea.style.display = 'block';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  let baixados = 0;
+  let erros = 0;
+  const total = produtos.length;
+
+  for (let i = 0; i < total; i++) {
+    const p = produtos[i];
+    const num = String(i + 1).padStart(2, '0');
+    let safeTitle = (p.title || 'produto').replace(/[\\/:*?"<>|]/g, '').trim();
+    if (safeTitle.length > 50) safeTitle = safeTitle.substring(0, 50).trim();
+    const fileName = `${num} - ${safeTitle}.jpg`;
+
+    const pct = Math.round(((i + 1) / total) * 100);
+    txtStatus.textContent = `Baixando fotos: ${i + 1} de ${total}`;
+    txtPorcentagem.textContent = `${pct}%`;
+    barra.style.width = `${pct}%`;
+    txtItem.textContent = `${num} - ${p.title}`;
+
+    try {
+      let imgUrl = p.image || cacheImagens[p.itemId || p.id || p.productUrl];
+
+      // Se não tem foto, tenta buscar do endpoint
+      if (!imgUrl) {
+        const targetUrl = p.offerUrl || p.offer_url || p.productUrl || p.product_url;
+        if (targetUrl) {
+          try {
+            const ctrl = new AbortController();
+            const tid = setTimeout(() => ctrl.abort(), 4000);
+            const r = await fetch(`/api/scrape?url=${encodeURIComponent(targetUrl)}`, { signal: ctrl.signal });
+            clearTimeout(tid);
+            if (r.ok) {
+              const j = await r.json();
+              if (j.data?.image) imgUrl = j.data.image;
+            }
+          } catch(e) {}
+        }
+      }
+
+      if (imgUrl) {
+        const resp = await fetch(imgUrl);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          baixados++;
+          p.image = imgUrl;
+          cacheImagens[p.itemId || p.id || p.productUrl] = imgUrl;
+        } else {
+          erros++;
+        }
+      } else {
+        erros++;
+      }
+    } catch (err) {
+      console.warn('Erro ao salvar foto:', fileName, err);
+      erros++;
+    }
+  }
+
+  localStorage.setItem('shopee_cache_imagens', JSON.stringify(cacheImagens));
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  txtStatus.textContent = `🎉 Concluído! ${baixados} fotos salvas com sucesso!`;
+  txtStatus.style.color = '#16A34A';
+  toast(`🎉 ${baixados} fotos salvas na pasta escolhida!`);
+}
+
+/* 2. INSTRUÇÕES DO SCRIPT .BAT */
+function abrirInstrucoesBat() {
+  alert("⚡ SCRIPT AUTOMÁTICO DE FOTOS NO WINDOWS:\n\n1. Foi criado um arquivo chamado 'baixar-fotos-shopee.bat' na pasta do seu site:\n   d:\\Mauro.Nunes\\OneDrive\\Mauro\\Paizao dos Descontos\\site\\baixar-fotos-shopee.bat\n\n2. Dê 2 cliques nele no Windows Explorer!\n\n3. Ele baixa todas as 100 fotos em alta velocidade e abre automaticamente a pasta:\n   D:\\Users\\Mauro\\Pictures\\PaizaoDosDescontos\n\nÉ a opção mais rápida e que roda em segundo plano!");
+}
+
+/* 3. DOWNLOAD COMO PACOTE ZIP */
+async function executarDownloadZip() {
+  if (typeof JSZip === 'undefined') {
+    alert('Biblioteca ZIP carregando, aguarde 2 segundos e tente novamente.');
+    return;
+  }
+
+  const btnZip = $('#btnGerarZip');
+  const originalTxt = btnZip.innerHTML;
+  btnZip.disabled = true;
+  btnZip.textContent = '⏳ Gerando ZIP...';
+
+  const progressoArea = $('#progressoLoteArea');
+  const txtStatus = $('#txtStatusLote');
+  const txtPorcentagem = $('#txtPorcentagemLote');
+  const barra = $('#barraProgressoLote');
+  const txtItem = $('#txtItemAtualLote');
+
+  progressoArea.style.display = 'block';
+
+  try {
+    const zip = new JSZip();
+    const pastaFotos = zip.folder('PaizaoDosDescontos_Shopee');
+    const total = produtos.length;
+    let fotosAdicionadas = 0;
+
+    for (let i = 0; i < total; i++) {
+      const p = produtos[i];
+      const num = String(i + 1).padStart(2, '0');
+      let safeTitle = (p.title || 'produto').replace(/[\\/:*?"<>|]/g, '').trim();
+      if (safeTitle.length > 50) safeTitle = safeTitle.substring(0, 50).trim();
+      const fileName = `${num} - ${safeTitle}.jpg`;
+
+      const pct = Math.round(((i + 1) / total) * 100);
+      txtStatus.textContent = `Coletando fotos para o ZIP: ${i + 1} de ${total}`;
+      txtPorcentagem.textContent = `${pct}%`;
+      barra.style.width = `${pct}%`;
+      txtItem.textContent = `${num} - ${p.title}`;
+
+      let imgUrl = p.image || cacheImagens[p.itemId || p.id || p.productUrl];
+
+      if (imgUrl) {
+        try {
+          const resp = await fetch(imgUrl);
+          if (resp.ok) {
+            const blob = await resp.blob();
+            pastaFotos.file(fileName, blob);
+            fotosAdicionadas++;
+          }
+        } catch(e) {}
+      }
+    }
+
+    txtStatus.textContent = 'Compactando arquivo ZIP...';
+    const content = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'PaizaoDosDescontos_Fotos_Shopee.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    txtStatus.textContent = `🎉 ZIP gerado com ${fotosAdicionadas} fotos!`;
+    toast('📦 Arquivo ZIP baixado com sucesso!');
+  } catch (err) {
+    alert('Erro ao gerar o arquivo ZIP: ' + err.message);
+  } finally {
+    btnZip.disabled = false;
+    btnZip.innerHTML = originalTxt;
+  }
+}
+
+function salvarCredenciaisApi() {
+  const appId = $('#inputAppId').value.trim();
+  const secret = $('#inputSecretKey').value.trim();
+  localStorage.setItem('shopee_app_id', appId);
+  localStorage.setItem('shopee_secret_key', secret);
+  fecharModalApi();
+  toast('🔑 Credenciais salvas com sucesso!');
+}
+</script>
+</body>
+</html>

@@ -28,30 +28,108 @@ export default async function handler(req, res) {
       if (loc) finalUrl = loc;
     }
 
-    const response = await fetch(finalUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    // Se for link da Shopee (shortlink s.shopee.com.br, shope.ee ou produto)
+    const isShopee = finalUrl.includes('shopee.com.br') || finalUrl.includes('shope.ee') || finalUrl.includes('s.shopee.com.br');
+    if (isShopee) {
+      // 1. Resolve redirect de link curto caso necessário
+      if (finalUrl.includes('s.shopee.com.br') || finalUrl.includes('shope.ee')) {
+        try {
+          const resShort = await fetch(finalUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+            },
+            redirect: 'manual'
+          });
+          const loc = resShort.headers.get('location');
+          if (loc) finalUrl = loc;
+        } catch (e) {}
+      }
+
+      // 2. Extrai shopId e itemId para montar a URL canônica do produto
+      const shopeeIdMatch = finalUrl.match(/(?:opaanlp\/|product\/|.+?-i\.)(\d+)[\/\.](\d+)/i) ||
+                            finalUrl.match(/itemid=(\d+).*?shopid=(\d+)/i);
+      if (shopeeIdMatch) {
+        let shopId, itemId;
+        if (finalUrl.includes('itemid=')) {
+          itemId = shopeeIdMatch[1];
+          shopId = shopeeIdMatch[2];
+        } else {
+          shopId = shopeeIdMatch[1];
+          itemId = shopeeIdMatch[2];
+        }
+        finalUrl = `https://shopee.com.br/product/${shopId}/${itemId}`;
+      }
+
+      // 3. Efetua fetch com User-Agent de crawler social para receber OpenGraph sem bloqueio
+      const shopeeResponse = await fetch(finalUrl, {
+        headers: {
+          'User-Agent': 'WhatsApp/2.21.11.17',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+        },
+        redirect: 'follow'
+      });
+
+      if (shopeeResponse.ok) {
+        html = await shopeeResponse.text();
+      }
+    }
+
+    // Se for link curto da Amazon (amzn.to ou a.co)
+    if (finalUrl.includes('amzn.to') || finalUrl.includes('a.co')) {
+      try {
+        const resShort = await fetch(finalUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+          },
+          redirect: 'manual'
+        });
+        const loc = resShort.headers.get('location');
+        if (loc) finalUrl = loc;
+      } catch (e) {}
+    }
+
+    if (!html) {
+      const isAmazon = finalUrl.includes('amazon.');
+      const headers = isAmazon ? {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Sec-Ch-Ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1'
+      } : {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
-      },
-      redirect: 'follow'
-    });
+      };
 
-    html = await response.text();
+      const response = await fetch(finalUrl, {
+        headers,
+        redirect: 'follow'
+      });
+      html = await response.text();
+    }
 
     // Extração de Título
     let title = '';
+    const isErrorTitle = (t) => !t || t.includes('Não é possível') || t.includes('Acesso negado') || t.includes('503 - Erro') || t.includes('Não foi possível encontrar');
+
     const amazonTitle = html.match(/id=["']productTitle["'][^>]*>([^<]+)<\/span>/i);
-    if (amazonTitle && amazonTitle[1]) {
+    if (amazonTitle && amazonTitle[1] && !isErrorTitle(amazonTitle[1])) {
       title = amazonTitle[1].trim();
     } else {
       const ogTitle = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) ||
                       html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
-      if (ogTitle && ogTitle[1] && !ogTitle[1].includes('Não é possível') && !ogTitle[1].includes('Acesso negado')) {
+      if (ogTitle && ogTitle[1] && !isErrorTitle(ogTitle[1])) {
         title = ogTitle[1];
       } else {
         const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-        if (titleMatch && titleMatch[1] && !titleMatch[1].includes('Não é possível') && !titleMatch[1].includes('Acesso negado')) {
+        if (titleMatch && titleMatch[1] && !isErrorTitle(titleMatch[1])) {
           title = titleMatch[1];
         }
       }
@@ -67,27 +145,52 @@ export default async function handler(req, res) {
       }
     }
 
+    // Limpa sufixos de marca no título
     if (title) {
-      title = title.replace(/\s*:\s*Amazon\.com\.br.*$/i, '')
+      title = title.replace(/\s*\|\s*MercadoLivre.*$/i, '')
+                   .replace(/\s*\|\s*Mercado Livre.*$/i, '')
+                   .replace(/\s*\|\s*Magazine Luiza.*$/i, '')
+                   .replace(/^Magazine Luiza\s*\|\s*/i, '')
+                   .replace(/\s*:\s*Amazon\.com\.br.*$/i, '')
                    .replace(/\s*\|\s*Amazon\.com\.br.*$/i, '')
+                   .replace(/\s*\|\s*Shopee\s*Brasil.*$/i, '')
                    .trim();
     }
 
-    // Extração de Imagem (com suporte a imagens em alta definição da Amazon e ML)
+    // Extração de Imagem (com suporte a alta definição Shopee, Amazon e ML)
     let image = '';
-    const amazonImg = html.match(/data-old-hires=["'](https:\/\/[^"']+)["']/i) ||
-                      html.match(/id=["']landingImage["'][^>]*src=["'](https:\/\/[^"']+)["']/i) ||
-                      html.match(/data-a-dynamic-image=["']\{["'](https:\/\/[^"']+)["']/i) ||
-                      html.match(/"hiRes":\s*"(https:\/\/[^"]+)"/i) ||
-                      html.match(/"large":\s*"(https:\/\/[^"]+)"/i);
-    if (amazonImg) {
-      image = amazonImg[1] || amazonImg[2] || amazonImg[3] || amazonImg[4] || amazonImg[5] || '';
-    } else {
-      const ogImg = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
-                    html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
-      if (ogImg && ogImg[1]) {
-        image = ogImg[1];
+    if (finalUrl.includes('shopee.') || html.includes('susercontent.com')) {
+      const shopeeImg = html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+                        html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/i) ||
+                        html.match(/https:\/\/(?:down-br|down-cvs-br|cf)\.img\.susercontent\.com\/file\/[a-zA-Z0-9_-]+/i);
+      if (shopeeImg) {
+        image = shopeeImg[1] || shopeeImg[0];
       }
+    }
+
+    if (!image) {
+      const ogImage = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
+                      html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+      if (ogImage && ogImage[1]) {
+        image = ogImage[1];
+      }
+    }
+
+    // Se for Amazon, tenta a imagem em alta resolução (data-old-hires ou landingImage)
+    if (finalUrl.includes('amazon.')) {
+      const amazonImg = html.match(/data-old-hires=["'](https:\/\/[^"']+)["']/i) ||
+                        html.match(/id=["']landingImage["'][^>]*data-a-dynamic-image=["']\{&quot;(https:\/\/[^&]+)&quot;/i) ||
+                        html.match(/"hiRes":\s*"(https:\/\/[^"]+)"/i) ||
+                        html.match(/"large":\s*"(https:\/\/[^"]+)"/i) ||
+                        html.match(/id=["']landingImage["'][^>]*src=["'](https:\/\/[^"']+)["']/i);
+      if (amazonImg) {
+        image = amazonImg[1] || amazonImg[2] || amazonImg[3] || amazonImg[4] || amazonImg[5] || '';
+      }
+    }
+
+    // Rejeita placeholders conhecidos de erro/bloqueio
+    if (image && (image.includes('deo.shopeemobile.com') || image.includes('placeholder'))) {
+      image = '';
     }
 
     // Extração de Preços (De e Por)
@@ -106,20 +209,31 @@ export default async function handler(req, res) {
     let pricePor = '';
 
     // 1. Preços da Amazon
-    const amazonPriceToPay = html.match(/class="[^"]*(?:apexPriceToPay|priceToPay)[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
-                             html.match(/class="a-price-whole">([0-9\.\,]+)<span class="a-price-decimal">[^<]*<\/span><span class="a-price-fraction">([0-9]+)</i);
+    const amazonPriceToPay = html.match(/class="[^"]*(?:apex-?price-?to-?pay|price-?to-?pay|corePriceDisplay)[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
+                             html.match(/class="[^"]*apex-core-price-identifier[^"]*"[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
+                             html.match(/id="corePriceDisplay_desktop_feature_div"[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
+                             html.match(/class="a-price-whole">([0-9\.\,]+)(?:<span class="a-price-decimal">[^<]*<\/span>)?<\/span><span class="a-price-fraction">([0-9]+)</i) ||
+                             html.match(/class="a-price-whole">([0-9\.\,]+)<span class="a-price-decimal">[^<]*<\/span><span class="a-price-fraction">([0-9]+)</i) ||
+                             html.match(/class="a-price\b[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
+                             html.match(/id="(?:priceblock_ourprice|priceblock_dealprice|price_inside_buybox)"[^>]*>([^<]+)<\/span>/i) ||
+                             html.match(/"priceAmount":\s*([0-9\.]+)/i);
+
     if (amazonPriceToPay) {
       if (amazonPriceToPay[2]) {
         pricePor = `${amazonPriceToPay[1].replace(/\./g, '')},${amazonPriceToPay[2]}`;
       } else {
-        const clean = amazonPriceToPay[1].replace(/[^\d\,]/g, '');
+        const clean = amazonPriceToPay[1].replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '');
         if (clean) pricePor = clean;
       }
     }
 
-    const amazonPriceDe = html.match(/class="[^"]*(?:basisPrice|a-text-price)[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i);
+    const amazonPriceDe = html.match(/class="[^"]*(?:basis-?price|a-text-price|apex-basisprice)[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
+                          html.match(/class="[^"]*apex-basisprice-offscreen-label[^"]*">[^:]*:\s*([^<]+)<\/span>/i) ||
+                          html.match(/data-a-strike="true"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
+                          html.match(/class="a-text-strike"[^>]*>([\s\S]*?)<\/span>/i);
+
     if (amazonPriceDe && amazonPriceDe[1]) {
-      const clean = amazonPriceDe[1].replace(/[^\d\,]/g, '');
+      const clean = amazonPriceDe[1].replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '');
       if (clean) priceDe = clean;
     }
 

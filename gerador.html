@@ -494,6 +494,7 @@
       </div>
     </div>
     <div class="nav-links">
+      <a href="gerador-shopee.html" style="background:#EE4D2D;color:#fff;border-color:#EE4D2D">🟠 Gerador Shopee ↗</a>
       <a href="grupos/" target="_blank">Ver Grupos ↗</a>
       <a href="p/index.html" target="_blank">Ver /p/ ↗</a>
     </div>
@@ -1079,19 +1080,23 @@ async function buscarDadosOferta() {
     // 1. Tenta nossos endpoints em paralelo de altíssima velocidade
     try {
       const endpoints = [
+        `${window.location.origin}/api/scrape?url=${encodeURIComponent(url)}`,
         `https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`,
         `https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`
       ];
 
       const fetchPromises = endpoints.map(async (ep) => {
         const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), 3500);
+        const tid = setTimeout(() => ctrl.abort(), 5500);
         try {
           const r = await fetch(ep, { signal: ctrl.signal });
           clearTimeout(tid);
           if (r.ok) {
             const json = await r.json();
             if (json.status === 'success' && json.data && (json.data.title || json.data.image)) {
+              if (json.data.title && (json.data.title.includes('503 - Erro') || json.data.title.includes('Não foi possível encontrar'))) {
+                throw new Error('Bloqueio temporário');
+              }
               return json.data;
             }
           }
@@ -1104,43 +1109,52 @@ async function buscarDadosOferta() {
       try {
         const winner = await Promise.any(fetchPromises);
         if (winner) {
-          tituloExtraido = winner.title || '';
-          imagemExtraida = winner.image || '';
-          precoDeExtraido = winner.priceDe || '';
-          precoPorExtraido = winner.pricePor || '';
+          if (winner.title && !winner.title.includes('503 - Erro') && !winner.title.includes('Não foi possível')) {
+            tituloExtraido = winner.title;
+          }
+          if (winner.image) imagemExtraida = winner.image;
+          if (winner.priceDe) precoDeExtraido = winner.priceDe;
+          if (winner.pricePor) precoPorExtraido = winner.pricePor;
         }
       } catch(eAny) {}
     } catch(eV) {
       console.log('Scraper parallel fallback...', eV);
     }
 
-    // 2. Se necessário, tenta Microlink
-    if (!tituloExtraido || !imagemExtraida) {
+    // 2. Se faltou título, imagem ou preço, tenta Microlink com seletores Mercado Livre e Amazon
+    if (!tituloExtraido || !imagemExtraida || !precoPorExtraido) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4500);
-        const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.priceDe.selector=s .andes-money-amount__fraction&data.centsDe.selector=s .andes-money-amount__cents&data.pricePor.selector=.andes-money-amount:not(s) .andes-money-amount__fraction&data.centsPor.selector=.andes-money-amount:not(s) .andes-money-amount__cents`;
+        const timeoutId = setTimeout(() => controller.abort(), 5500);
+        const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.priceDe.selector=.basisPrice .a-offscreen, .apex-basisprice-offscreen-label, [data-a-strike="true"] .a-offscreen, s .andes-money-amount__fraction&data.centsDe.selector=s .andes-money-amount__cents&data.pricePor.selector=.apex-pricetopay-value .a-offscreen, .priceToPay .a-offscreen, #corePriceDisplay_desktop_feature_div .a-offscreen, .a-price-whole, .andes-money-amount:not(s) .andes-money-amount__fraction&data.centsPor.selector=.a-price-fraction, .andes-money-amount:not(s) .andes-money-amount__cents`;
         
         const resMicro = await fetch(microUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (resMicro.ok) {
           const dataMicro = await resMicro.json();
           if (dataMicro.status === 'success' && dataMicro.data) {
-            if (!tituloExtraido) tituloExtraido = dataMicro.data.title || '';
-            if (!imagemExtraida) imagemExtraida = dataMicro.data.image?.url || '';
+            if (!tituloExtraido && dataMicro.data.title && !dataMicro.data.title.includes('Não foi possível')) {
+              tituloExtraido = dataMicro.data.title;
+            }
+            if (!imagemExtraida && dataMicro.data.image?.url && !dataMicro.data.image.url.includes('error/logo')) {
+              imagemExtraida = dataMicro.data.image.url;
+            }
+
+            function formatarPrecoRaw(val, cents) {
+              if (!val) return '';
+              let s = String(val).replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '').trim();
+              if (s.includes(',')) return s;
+              let c = cents ? String(cents).replace(/[^\d]/g, '') : '00';
+              if (c.length === 1) c += '0';
+              return `${s},${c}`;
+            }
 
             if (dataMicro.data.priceDe && !precoDeExtraido) {
-              let pDe = String(dataMicro.data.priceDe).replace(/\./g, '');
-              let cDe = dataMicro.data.centsDe ? String(dataMicro.data.centsDe) : '00';
-              if (cDe.length === 1) cDe += '0';
-              precoDeExtraido = `${pDe},${cDe}`;
+              precoDeExtraido = formatarPrecoRaw(dataMicro.data.priceDe, dataMicro.data.centsDe);
             }
 
             if (dataMicro.data.pricePor && !precoPorExtraido) {
-              let pPor = String(dataMicro.data.pricePor).replace(/\./g, '');
-              let cPor = dataMicro.data.centsPor ? String(dataMicro.data.centsPor) : '00';
-              if (cPor.length === 1) cPor += '0';
-              precoPorExtraido = `${pPor},${cPor}`;
+              precoPorExtraido = formatarPrecoRaw(dataMicro.data.pricePor, dataMicro.data.centsPor);
             }
           }
         }
