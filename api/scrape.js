@@ -279,6 +279,30 @@ export default async function handler(req, res) {
       priceDe = '';
     }
 
+    if (req.query.debug) {
+      const rMatches = (html.match(/R\$\s*[\d\.\,]+/gi) || []).slice(0, 15);
+      const offscreenMatches = (html.match(/<span class="a-offscreen">([^<]+)<\/span>/gi) || []).slice(0, 10);
+      const ldJsonMatches = (html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi) || []).slice(0, 3);
+      return res.status(200).json({
+        status: 'debug',
+        data: {
+          title,
+          image,
+          priceDe,
+          pricePor,
+          finalUrl,
+          htmlLength: html.length,
+          hasPriceWhole: html.includes('a-price-whole'),
+          hasOffscreen: html.includes('a-offscreen'),
+          hasApexPrice: html.includes('apex'),
+          hasCenterCol: html.includes('centerCol'),
+          rMatches,
+          offscreenMatches,
+          ldJsonMatches
+        }
+      });
+    }
+
     return res.status(200).json({
       status: 'success',
       data: {
