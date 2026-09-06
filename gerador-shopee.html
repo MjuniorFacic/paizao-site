@@ -715,7 +715,10 @@
       <h2>
         <span>📦 Fila Shopee</span>
       </h2>
-      <span class="badge-contador" id="badgeContador">44 Ofertas</span>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="badge-contador" id="badgeArquivoCsv" style="background:#F1F5F9;color:#475569;font-weight:600;font-size:11px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Arquivo de Origem">📄 data-shopee-top100.csv</span>
+        <span class="badge-contador" id="badgeContador">44 Ofertas</span>
+      </div>
     </div>
 
     <input type="text" class="busca-input" id="inputBuscaFila" placeholder="🔍 Filtrar produtos por nome..." oninput="filtrarFila()">
@@ -891,9 +894,14 @@
   <div class="modal-box">
     <button class="modal-close" onclick="fecharModalCsv()">✕</button>
     <h3>📁 Importar Novo CSV da Shopee</h3>
-    <p style="font-size:13.5px;color:#64748B;margin-bottom:18px">
+    <p style="font-size:13.5px;color:#64748B;margin-bottom:14px">
       Selecione um novo arquivo de relatório exportado do Programa de Afiliados da Shopee (ex: <code>Links_Shopee.csv</code>).
     </p>
+
+    <div id="infoArquivoAtualCsv" style="margin-bottom:14px;padding:9px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;color:#334155;display:flex;align-items:center;justify-content:space-between">
+      <span><b>Arquivo atual:</b> <span id="txtArquivoAtualModalCsv" style="font-family:monospace;color:#C2410C;font-weight:700">data-shopee-top100.csv</span></span>
+      <span style="color:#16A34A;font-weight:700;font-size:11px;background:#DCFCE7;padding:2px 8px;border-radius:99px">● Carregado</span>
+    </div>
 
     <div style="border:2px dashed #CBD5E1;border-radius:12px;padding:28px;text-align:center;cursor:pointer;background:#F8FAFC" onclick="$('#fileInputCsv').click()">
       <div style="font-size:32px;margin-bottom:8px">📄</div>
@@ -926,10 +934,26 @@
       Baixe em alta resolução as fotos de todas as <b><span id="txtTotalFotosLote">100</span> ofertas</b> da lista diretamente para o seu computador.
     </p>
 
-    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:16px">
-      <div style="font-size:12px;color:#64748B;margin-bottom:4px">Pasta de Destino Recomendada:</div>
-      <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:12.5px;color:#0F172A">
-        📁 D:\Users\Mauro\Pictures\PaizaoDosDescontos
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:16px;display:flex;flex-direction:column;gap:10px">
+      <div>
+        <div style="font-size:12px;color:#64748B;margin-bottom:4px;font-weight:600">📄 Arquivo de Importação (Origem das Imagens):</div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:12.5px;color:#C2410C;font-weight:700">
+          📊 <span id="txtNomeArquivoOrigem">data-shopee-top100.csv</span>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:12px;color:#64748B;margin-bottom:4px;font-weight:600">📁 Pasta de Destino das Imagens:</div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:12.5px;color:#0F172A">
+          📁 D:\Users\Mauro\Pictures\PaizaoDosDescontos
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:12px;color:#64748B;margin-bottom:4px;font-weight:600">🏷️ Nomenclatura das Fotos Salvas:</div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:8px 12px;font-family:monospace;font-size:12px;color:#0369A1">
+          🖼️ <span id="txtExemploNomeFoto">01 - [Nome do Produto].jpg</span>
+        </div>
       </div>
     </div>
 
@@ -957,8 +981,8 @@
       <!-- OPÇÃO 2: SCRIPT .BAT NO WINDOWS -->
       <div style="display:flex;justify-content:space-between;align-items:center;background:#FFF7ED;border:1px solid #FFEDD5;border-radius:10px;padding:10px 12px">
         <div>
-          <b style="font-size:12.5px;color:#9A3412;display:block">⚡ Opção 2: Script Windows (.BAT) com 1 Clique</b>
-          <span style="font-size:11px;color:#C2410C">Baixa 100% no terminal sem limite de memória.</span>
+          <b style="font-size:12.5px;color:#9A3412;display:block">⚡ Opção 2: Script Windows (baixar-fotos-shopee.bat)</b>
+          <span style="font-size:11px;color:#C2410C">Arquivo executável no projeto para baixar tudo direto no terminal.</span>
         </div>
         <button type="button" class="nav-btn" onclick="abrirInstrucoesBat()" style="font-size:12px;padding:6px 12px;white-space:nowrap">Como Usar</button>
       </div>
@@ -966,7 +990,7 @@
       <!-- OPÇÃO 3: PACOTE ZIP -->
       <div style="display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px">
         <div>
-          <b style="font-size:12.5px;color:#334155;display:block">📦 Opção 3: Baixar Pacote (.ZIP)</b>
+          <b style="font-size:12.5px;color:#334155;display:block">📦 Opção 3: Baixar Pacote (PaizaoDosDescontos_Fotos_Shopee.zip)</b>
           <span style="font-size:11px;color:#64748B">Gera um arquivo ZIP com todas as imagens organizadas.</span>
         </div>
         <button type="button" id="btnGerarZip" class="nav-btn" onclick="executarDownloadZip()" style="font-size:12px;padding:6px 12px;white-space:nowrap">Gerar ZIP</button>
@@ -1160,6 +1184,26 @@ async function inicializar() {
   renderizarFila();
   if (produtos.length > 0) {
     selecionarProduto(0);
+  }
+  atualizarNomeArquivoUI();
+}
+
+function atualizarNomeArquivoUI(nome) {
+  if (!nome) {
+    nome = localStorage.getItem('shopee_csv_nome_arquivo') || 'data-shopee-top100.csv';
+  } else {
+    localStorage.setItem('shopee_csv_nome_arquivo', nome);
+  }
+  
+  if ($('#txtNomeArquivoOrigem')) $('#txtNomeArquivoOrigem').textContent = nome;
+  if ($('#badgeArquivoCsv')) $('#badgeArquivoCsv').textContent = '📄 ' + nome;
+  if ($('#txtArquivoAtualModalCsv')) $('#txtArquivoAtualModalCsv').textContent = nome;
+  
+  if (produtos && produtos.length > 0) {
+    const p1 = produtos[0];
+    let safe1 = (p1.title || 'produto').replace(/[\\/:*?"<>|]/g, '').trim();
+    if (safe1.length > 40) safe1 = safe1.substring(0, 40).trim();
+    if ($('#txtExemploNomeFoto')) $('#txtExemploNomeFoto').textContent = `01 - ${safe1}.jpg`;
   }
 }
 
@@ -1663,10 +1707,11 @@ function processarArquivoCsv(e) {
     if (novosProdutos.length > 0) {
       produtos = novosProdutos;
       localStorage.setItem('shopee_csv_produtos_v2', JSON.stringify(novosProdutos));
+      atualizarNomeArquivoUI(file.name);
       renderizarFila();
       selecionarProduto(0);
       fecharModalCsv();
-      toast(`✅ ${novosProdutos.length} produtos carregados com sucesso do CSV!`);
+      toast(`✅ ${novosProdutos.length} produtos carregados de ${file.name}!`);
     } else {
       alert('Não foi possível reconhecer o padrão das colunas da Shopee neste CSV.');
     }
@@ -1794,6 +1839,7 @@ function fecharModalApi() { $('#modalApi').classList.remove('open'); }
 
 function abrirModalDownloadFotos() {
   $('#txtTotalFotosLote').textContent = produtos.length;
+  atualizarNomeArquivoUI();
   $('#modalDownloadFotos').classList.add('open');
 }
 function fecharModalDownloadFotos() {
