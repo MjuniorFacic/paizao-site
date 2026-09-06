@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     // Se for link da Shopee (shortlink s.shopee.com.br, shope.ee ou produto)
     const isShopee = finalUrl.includes('shopee.com.br') || finalUrl.includes('shope.ee') || finalUrl.includes('s.shopee.com.br');
     if (isShopee) {
+      const originalShort = finalUrl;
       // 1. Resolve redirect de link curto caso necessário
       if (finalUrl.includes('s.shopee.com.br') || finalUrl.includes('shope.ee')) {
         try {
@@ -60,17 +61,38 @@ export default async function handler(req, res) {
         finalUrl = `https://shopee.com.br/product/${shopId}/${itemId}`;
       }
 
-      // 3. Efetua fetch com User-Agent de crawler social para receber OpenGraph sem bloqueio
-      const shopeeResponse = await fetch(finalUrl, {
-        headers: {
-          'User-Agent': 'WhatsApp/2.21.11.17',
-          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
-        },
-        redirect: 'follow'
-      });
+      // 3. Efetua fetch com User-Agent TelegramBot para receber OpenGraph completo sem captcha/bloqueio
+      try {
+        const shopeeResponse = await fetch(finalUrl, {
+          headers: {
+            'User-Agent': 'TelegramBot (like TwitterBot)',
+            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+          },
+          redirect: 'follow'
+        });
 
-      if (shopeeResponse.ok) {
-        html = await shopeeResponse.text();
+        if (shopeeResponse.ok) {
+          html = await shopeeResponse.text();
+        }
+      } catch (e) {}
+
+      // 4. Fallback: Se a página canônica não trouxe OpenGraph, busca diretamente do link curto com TelegramBot
+      if ((!html || !html.includes('og:title')) && originalShort) {
+        try {
+          const resDirectShort = await fetch(originalShort, {
+            headers: {
+              'User-Agent': 'TelegramBot (like TwitterBot)',
+              'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+            },
+            redirect: 'follow'
+          });
+          if (resDirectShort.ok) {
+            const shortHtml = await resDirectShort.text();
+            if (shortHtml.includes('og:title') || shortHtml.includes('og:image')) {
+              html = shortHtml;
+            }
+          }
+        } catch (e) {}
       }
     }
 
@@ -116,9 +138,17 @@ export default async function handler(req, res) {
       html = await response.text();
     }
 
-    // Extração de Título
     let title = '';
     const isErrorTitle = (t) => !t || t.includes('Não é possível') || t.includes('Acesso negado') || t.includes('503 - Erro') || t.includes('Não foi possível encontrar');
+
+    // Se for Shopee e tiver descrição completa "Compre <Título> na Shopee Brasil!", extrai o título limpo e não truncado
+    if (html.includes('shopee.com.br') || html.includes('susercontent.com') || isShopee) {
+      const shopeeDescTitle = html.match(/content=["']Compre\s+([^!]+?)\s+na\s+Shopee\s+Brasil!/i) ||
+                              html.match(/Compre\s+([^!]+?)\s+na\s+Shopee\s+Brasil!/i);
+      if (shopeeDescTitle && shopeeDescTitle[1] && !isErrorTitle(shopeeDescTitle[1])) {
+        title = shopeeDescTitle[1].trim();
+      }
+    }
 
     const amazonTitle = html.match(/id=["']productTitle["'][^>]*>([^<]+)<\/span>/i);
     if (amazonTitle && amazonTitle[1] && !isErrorTitle(amazonTitle[1])) {

@@ -1324,11 +1324,12 @@ async function buscarLinkAvulso() {
   status.style.color = 'var(--shopee)';
 
   try {
-    const endpoints = [
-      `${window.location.origin}/api/scrape?url=${encodeURIComponent(url)}`,
-      `https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`,
-      `https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`
-    ];
+    const endpoints = [];
+    if (window.location.origin && !window.location.origin.startsWith('file') && window.location.origin !== 'null') {
+      endpoints.push(`${window.location.origin}/api/scrape?url=${encodeURIComponent(url)}`);
+    }
+    endpoints.push(`https://www.paizaodosdescontos.com.br/api/scrape?url=${encodeURIComponent(url)}`);
+    endpoints.push(`https://paiz-o-dos-descontos-1.vercel.app/api/scrape?url=${encodeURIComponent(url)}`);
 
     let achou = null;
     for (const ep of endpoints) {
@@ -1373,6 +1374,7 @@ async function buscarLinkAvulso() {
         $('#inputTitulo').value = achou.title.replace(/\s*\|\s*Shopee\s*Brasil.*$/i, '').trim();
         const cat = identificarCategoriaShopee(achou.title);
         $('#inputHeadline').value = gerarHeadlineShopee(cat);
+        renderizarChipsHeadlines(cat);
       }
       if (achou.image) {
         $('#inputImg').value = achou.image;
