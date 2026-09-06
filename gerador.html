@@ -519,7 +519,12 @@
 
     <!-- HEADLINE COM FILTRO INTELIGENTE E DINÂMICO DE EMOJIS -->
     <div class="campo">
-      <label>2. Headline (Benefício em Caixa Alta)</label>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <label style="margin-bottom:0">2. Headline (Benefício em Caixa Alta)</label>
+        <span style="font-size:11.5px;color:#0284c7;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px" onclick="trocarHeadlineAleatoria()">
+          🎲 Alternar Headline
+        </span>
+      </div>
       <input type="text" id="inputHeadline" value="❄️ CONFORTO E CLIMATIZAÇÃO PARA SUA CASA">
 
       <!-- BARRA INTELIGENTE DE EMOJIS -->
@@ -534,12 +539,16 @@
         <!-- ABAS RÁPIDAS CASO QUEIRA MUDAR O TEMA -->
         <div class="categoria-tabs" id="catTabs">
           <button type="button" class="tab-cat ativa" onclick="selecionarAba('auto')">🎯 Automático</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('suplementos')">💪 Suplementos</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('ferramentas')">🛠️ Ferramentas</button>
           <button type="button" class="tab-cat" onclick="selecionarAba('clima')">❄️ Ar & Clima</button>
           <button type="button" class="tab-cat" onclick="selecionarAba('tenis')">👟 Tênis & Moda</button>
           <button type="button" class="tab-cat" onclick="selecionarAba('cozinha')">🍳 Cozinha</button>
           <button type="button" class="tab-cat" onclick="selecionarAba('tech')">📱 Tech & Games</button>
-          <button type="button" class="tab-cat" onclick="selecionarAba('impressora')">🖨️ Impressoras</button>
           <button type="button" class="tab-cat" onclick="selecionarAba('casa')">🏠 Casa & Limpeza</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('beleza')">✨ Beleza</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('impressora')">🖨️ Impressoras</button>
+          <button type="button" class="tab-cat" onclick="selecionarAba('automotivo')">🚗 Automotivo</button>
           <button type="button" class="tab-cat" onclick="selecionarAba('geral')">🔥 Promoções</button>
         </div>
 
@@ -551,10 +560,7 @@
 
       <!-- TEMPLATES RÁPIDOS SUGERIDOS -->
       <div class="chips" id="templatesList">
-        <span class="chip" onclick="setHeadline('❄️ CONFORTO E CLIMATIZAÇÃO PARA SUA CASA')">❄️ Ar & Clima</span>
-        <span class="chip" onclick="setHeadline('🥶 REFRESCÂNCIA MÁXIMA PARA O SEU VERÃO')">🥶 Refrescância</span>
-        <span class="chip" onclick="setHeadline('💣 BOMBA! SUPER OFERTA DO DIA')">💣 Super Oferta</span>
-        <span class="chip" onclick="setHeadline('🏠 CONFORTO E BEM-ESTAR PARA SUA FAMÍLIA')">🏠 Família & Lar</span>
+        <!-- Renderizado dinamicamente -->
       </div>
     </div>
 
@@ -669,158 +675,175 @@ const BANCO_EMOJIS = {
   clima: {
     nome: "Ar Condicionado & Clima",
     emojis: [
-      { e: "🥶", d: "Boneco com frio / Gelado" },
-      { e: "❄️", d: "Floco de Neve / Frio" },
-      { e: "🏠", d: "Casinha / Lar" },
-      { e: "🌡️", d: "Termômetro" },
-      { e: "😌", d: "Bem-estar / Alívio" },
-      { e: "💨", d: "Vento / Ar fresco" },
-      { e: "💣", d: "Bomba de Promoção" },
-      { e: "🔥", d: "Super Oferta" },
-      { e: "⚡", d: "Economia / Inverter" },
-      { e: "💸", d: "Desconto" },
-      { e: "🚨", d: "Alerta Urgente" },
-      { e: "🏆", d: "Top de Linha" }
+      { e: "❄️", d: "Floco de Neve" }, { e: "🥶", d: "Refrescância" }, { e: "💨", d: "Ar Fresco" },
+      { e: "🏠", d: "Conforto no Lar" }, { e: "🌡️", d: "Clima Ideal" }, { e: "😌", d: "Alívio" },
+      { e: "⚡", d: "Inverter Econômico" }, { e: "💣", d: "Bomba de Desconto" }, { e: "🔥", d: "Super Oferta" },
+      { e: "💸", d: "Economia Real" }, { e: "🚨", d: "Urgente" }, { e: "🏆", d: "Top Escolha" }
     ],
     templates: [
       "❄️ CONFORTO E CLIMATIZAÇÃO PARA SUA CASA",
       "🥶 REFRESCÂNCIA MÁXIMA PARA O SEU VERÃO",
       "🌡️ O CLIMA PERFEITO DENTRO DA SUA CASA",
-      "💣 BOMBA! SUPER OFERTA DE AR CONDICIONADO",
-      "😌 BEM-ESTAR E ECONOMIA COM TECNOLOGIA INVERTER"
+      "😌 BEM-ESTAR E ECONOMIA COM TECNOLOGIA INVERTER",
+      "💣 BOMBA! SUPER OFERTA DE AR CONDICIONADO"
+    ]
+  },
+  suplementos: {
+    nome: "Suplementos, Treino & Fitness",
+    emojis: [
+      { e: "💪", d: "Força / Músculo" }, { e: "⚡", d: "Energia Pura" }, { e: "🥇", d: "Qualidade Premium" },
+      { e: "🏋️", d: "Treino Pesado" }, { e: "🔥", d: "Foco Total" }, { e: "🎯", d: "Resultados Reais" },
+      { e: "💣", d: "Preço Bomba" }, { e: "🚀", d: "Evolução" }, { e: "🏆", d: "Campeão de Vendas" },
+      { e: "💸", d: "Super Desconto" }, { e: "🥤", d: "Shake Perfeito" }, { e: "⭐", d: "100% Puro" }
+    ],
+    templates: [
+      "💪 PERFORMANCE E RESULTADOS MÁXIMOS NOS SEUS TREINOS",
+      "⚡ ENERGIA, FOCO E RECUPERAÇÃO MUSCULAR DE ALTO NÍVEL",
+      "🥇 SUPLEMENTAÇÃO PREMIUM COM O MELHOR CUSTO-BENEFÍCIO",
+      "🔥 CREATINA PURA DE ALTA ABSORÇÃO COM PREÇO BAIXO",
+      "💣 BOMBA! SUPER OFERTA DE SUPLEMENTOS NO MERCADO LIVRE"
+    ]
+  },
+  ferramentas: {
+    nome: "Ferramentas & Limpeza Pesada",
+    emojis: [
+      { e: "🛠️", d: "Ferramentas" }, { e: "⚡", d: "Potência Total" }, { e: "💦", d: "Lavadora / Jato" },
+      { e: "🔩", d: "Precisão" }, { e: "🧰", d: "Maleta Completa" }, { e: "💪", d: "Robustez" },
+      { e: "💣", d: "Super Promoção" }, { e: "🔥", d: "Mais Vendido" }, { e: "🏠", d: "Casa & Obra" },
+      { e: "💸", d: "Economia" }, { e: "🚨", d: "Oportunidade" }, { e: "🏆", d: "Linha Profissional" }
+    ],
+    templates: [
+      "⚡ POTÊNCIA E PRATICIDADE PARA SEUS PROJETOS E REPAROS",
+      "💦 LIMPEZA PROFISSIONAL COM MÁXIMA PRESSÃO E ECONOMIA",
+      "🛠️ ROBUSTEZ E EFICIÊNCIA PARA O SEU DIA A DIA",
+      "🧰 FERRAMENTA DE ALTA QUALIDADE COM PREÇO IMBATÍVEL",
+      "💣 BOMBA! SUPER OFERTA EM FERRAMENTAS PROFISSIONAIS"
     ]
   },
   tenis: {
-    nome: "Tênis, Calçados & Corrida",
+    nome: "Tênis, Calçados & Moda",
     emojis: [
-      { e: "👟", d: "Tênis / Calçado" },
-      { e: "🏃", d: "Corrida / Atleta" },
-      { e: "🥇", d: "Medalha de Ouro" },
-      { e: "🏆", d: "Troféu / Campeão" },
-      { e: "💨", d: "Velocidade / Leveza" },
-      { e: "⚡", d: "Performance" },
-      { e: "💣", d: "Bomba de Promoção" },
-      { e: "🔥", d: "Oferta Quente" },
-      { e: "👕", d: "Moda / Estilo" },
-      { e: "🏷️", d: "Desconto Exclusivo" },
-      { e: "💸", d: "Preço Baixo" },
-      { e: "🚨", d: "Estoque Limitado" }
+      { e: "👟", d: "Tênis Confortável" }, { e: "🏃", d: "Corrida / Treino" }, { e: "🔥", d: "Estilo Moderno" },
+      { e: "🥇", d: "Mais Vendido" }, { e: "💨", d: "Leveza / Amortecimento" }, { e: "👕", d: "Moda & Estilo" },
+      { e: "💣", d: "Bomba de Desconto" }, { e: "⚡", d: "Performance" }, { e: "💸", d: "Preço Baixo" },
+      { e: "🏷️", d: "Cupom Ativo" }, { e: "🚨", d: "Últimos Pares" }, { e: "🏆", d: "Qualidade Original" }
     ],
     templates: [
-      "👟 CONFORTO E ESTILO PARA SEU DIA A DIA",
-      "🏃 MÁXIMA PERFORMANCE PARA SEUS TREINOS",
-      "🥇 O TÊNIS CAMPEÃO DE VENDAS COM PREÇO BAIXO",
-      "💣 BOMBA! ACHADINHO EM CALÇADOS",
-      "🔥 OPORTUNIDADE IMPERDÍVEL EM TÊNIS"
-    ]
-  },
-  impressora: {
-    nome: "Impressoras & Escritório",
-    emojis: [
-      { e: "🖨️", d: "Impressora" },
-      { e: "📄", d: "Papel / Documento" },
-      { e: "💼", d: "Escritório / Home Office" },
-      { e: "💻", d: "Computador / Wi-Fi" },
-      { e: "💰", d: "Super Economia" },
-      { e: "🚀", d: "Alta Produtividade" },
-      { e: "💣", d: "Bomba de Oferta" },
-      { e: "🔥", d: "Super Promoção" },
-      { e: "⚡", d: "Rápida e Prática" },
-      { e: "⭐", d: "Nota Máxima" }
-    ],
-    templates: [
-      "🖨️ IMPRESSÃO ECONÔMICA E DE ALTA QUALIDADE",
-      "💰 ECONOMIA REAL DE TINTA PARA SEU DIA A DIA",
-      "💼 PRATICIDADE TOTAL PARA SUA CASA E ESCRITÓRIO",
-      "💣 BOMBA! IMPRESSORA MULTIFUNCIONAL EM OFERTA"
+      "👟 CONFORTO ABSOLUTO E ESTILO PARA O SEU DIA A DIA",
+      "🏃 PISADA LEVE E MÁXIMO AMORTECIMENTO PARA SEUS TREINOS",
+      "🥇 O TÊNIS CAMPEÃO DE VENDAS COM PREÇO IMBATÍVEL",
+      "🔥 VISUAL MODERNO E RESISTENTE COM DESCONTO REAL",
+      "💣 BOMBA! ACHADINHO DE CALÇADOS NO MERCADO LIVRE"
     ]
   },
   cozinha: {
     nome: "Cozinha & Eletrodomésticos",
     emojis: [
-      { e: "🍳", d: "Frigideira / Cozinha" },
-      { e: "🍟", d: "Air Fryer / Praticidade" },
-      { e: "☕", d: "Cafeteira / Café" },
-      { e: "👨‍🍳", d: "Chef de Cozinha" },
-      { e: "😋", d: "Saboroso" },
-      { e: "🏠", d: "Casa & Família" },
-      { e: "⚡", d: "Rápido e Prático" },
-      { e: "💣", d: "Bomba de Oferta" },
-      { e: "🔥", d: "Super Oferta" },
-      { e: "💸", d: "Preço Baixo" }
+      { e: "🍳", d: "Praticidade" }, { e: "🍟", d: "Air Fryer Crocante" }, { e: "☕", d: "Café Perfeito" },
+      { e: "😋", d: "Saboroso" }, { e: "⚡", d: "Rápido no Preparo" }, { e: "👨‍🍳", d: "Chef em Casa" },
+      { e: "🏠", d: "Família Reunida" }, { e: "💣", d: "Super Promoção" }, { e: "🔥", d: "Desconto Quente" },
+      { e: "💸", d: "Economia" }, { e: "✨", d: "Inovação" }, { e: "🍽️", d: "Mesa Completa" }
     ],
     templates: [
-      "🍳 PRATICIDADE E VELOCIDADE NA COZINHA",
-      "🍟 RECEITAS DELICIOSAS E SAUDÁVEIS SEM ÓLEO",
+      "🍳 PRATICIDADE E VELOCIDADE MÁXIMA NA SUA COZINHA",
+      "🍟 RECEITAS CROCANTES E SAUDÁVEIS SEM ESFORÇO",
       "☕ O CAFÉ PERFEITO NA HORA QUE VOCÊ QUISER",
-      "💣 BOMBA! ELETROPORTÁTEIS COM DESCONTO REAL"
+      "⚡ REVOLUÇÃO E AGILIDADE NO PREPARO DAS SUAS REFEIÇÕES",
+      "💣 BOMBA! ELETROPORTÁTEIS COM DESCONTO REAL NO MERCADO LIVRE"
     ]
   },
   tech: {
     nome: "Celulares, Áudio & Games",
     emojis: [
-      { e: "📱", d: "Smartphone" },
-      { e: "🎧", d: "Fone de Ouvido" },
-      { e: "⌚", d: "Smartwatch" },
-      { e: "🎮", d: "Gamer / Controle" },
-      { e: "🔊", d: "Som Potente" },
-      { e: "🔋", d: "Super Bateria" },
-      { e: "🚀", d: "Velocidade" },
-      { e: "💣", d: "Bomba de Promoção" },
-      { e: "🔥", d: "Lançamento / Quente" },
-      { e: "⚡", d: "Top de Linha" }
+      { e: "📱", d: "Smartphone" }, { e: "🎧", d: "Áudio Potente" }, { e: "🎮", d: "Setup Gamer" },
+      { e: "⌚", d: "Smartwatch" }, { e: "🔊", d: "Som Cristalino" }, { e: "🔋", d: "Super Bateria" },
+      { e: "🚀", d: "Super Rápido" }, { e: "⚡", d: "Top de Linha" }, { e: "💣", d: "Bomba de Desconto" },
+      { e: "🔥", d: "Mais Desejado" }, { e: "💻", d: "Produtividade" }, { e: "🏆", d: "Alta Tecnologia" }
     ],
     templates: [
-      "📱 SUPER OFERTA EM SMARTPHONE",
-      "🎧 ÁUDIO DE ALTA QUALIDADE E POTÊNCIA",
-      "🎮 SETUP GAMER COM PREÇO IMBATÍVEL",
-      "⌚ TECNOLOGIA E SAÚDE NO SEU PULSO",
-      "💣 BOMBA! TECNOLOGIA COM SUPER DESCONTO"
+      "📱 TECNOLOGIA DE PONTA COM SUPER DESCONTO EXCLUSIVO",
+      "🎧 ÁUDIO DE ALTA FIDELIDADE COM GRAVES POTENTES",
+      "🎮 SETUP GAMER COM PERFORMANCE E PREÇO IMBATÍVEL",
+      "⌚ TECNOLOGIA E SAÚDE NO SEU PULSO TODOS OS DIAS",
+      "💣 BOMBA! ACHADINHO TECH COM PREÇO BAIXO NO MERCADO LIVRE"
     ]
   },
   casa: {
     nome: "Casa, Limpeza & Organização",
     emojis: [
-      { e: "🏠", d: "Casinha / Lar" },
-      { e: "🗑️", d: "Lixeira Inteligente" },
-      { e: "🧹", d: "Limpeza" },
-      { e: "✨", d: "Brilho / Limpo" },
-      { e: "🤖", d: "Sensor / Robô" },
-      { e: "😌", d: "Praticidade" },
-      { e: "💣", d: "Bomba de Oferta" },
-      { e: "🔥", d: "Super Oferta" },
-      { e: "💸", d: "Economia" },
-      { e: "🚨", d: "Urgente" }
+      { e: "🏠", d: "Casa Confortável" }, { e: "✨", d: "Tudo Limpo" }, { e: "🤖", d: "Sensor Inteligente" },
+      { e: "🗑️", d: "Lixeira Recarregável" }, { e: "🧹", d: "Praticidade" }, { e: "😌", d: "Ambiente Gostoso" },
+      { e: "💡", d: "Casa Inteligente" }, { e: "💣", d: "Achadinho Bomba" }, { e: "🔥", d: "Super Oferta" },
+      { e: "💸", d: "Economia" }, { e: "🛋️", d: "Conforto" }, { e: "🚨", d: "Aproveite" }
     ],
     templates: [
-      "🏠 PRATICIDADE E HIGIENE PARA SUA CASA",
-      "✨ CASA LIMPA E ORGANIZADA COM FACILIDADE",
-      "🤖 TECNOLOGIA E CONFORTO PARA SEU LAR",
-      "💣 BOMBA! ACHADINHO PARA SUA CASA"
+      "🏠 PRATICIDADE E CONFORTO PARA O SEU LAR",
+      "✨ CASA LIMPA E ORGANIZADA COM O MÍNIMO DE ESFORÇO",
+      "🤖 TECNOLOGIA E HIGIENE INTELIGENTE PARA SEU DIA A DIA",
+      "🗑️ HIGIENE TOTAL COM SENSOR INTELIGENTE RECARREGÁVEL",
+      "💣 BOMBA! ACHADINHO INTELIGENTE PARA SUA CASA"
+    ]
+  },
+  beleza: {
+    nome: "Beleza, Perfumes & Cuidados",
+    emojis: [
+      { e: "✨", d: "Brilho e Autoestima" }, { e: "🌸", d: "Perfume Marcante" }, { e: "💄", d: "Maquiagem" },
+      { e: "💇", d: "Cabelo Perfeito" }, { e: "🧴", d: "Skincare" }, { e: "💆", d: "Cuidado Pessoal" },
+      { e: "🔥", d: "Sucesso de Vendas" }, { e: "💣", d: "Super Achadinho" }, { e: "💸", d: "Preço Baixo" },
+      { e: "⭐", d: "Qualidade Premium" }, { e: "🎁", d: "Presente Ideal" }, { e: "🏆", d: "Favorito" }
+    ],
+    templates: [
+      "✨ CUIDADO, ELEGÂNCIA E AUTOESTIMA PARA TODOS OS DIAS",
+      "🌸 FRAGRÂNCIA MARCANTE COM FIXAÇÃO PROLONGADA",
+      "💇 SEU VISUAL IMPECÁVEL COM QUALIDADE DE SALÃO EM CASA",
+      "🧴 CUIDADO E HIDRATAÇÃO COMPLETA COM PREÇO BAIXO",
+      "💣 BOMBA! ACHADINHO DE BELEZA IMPERDÍVEL NO MERCADO LIVRE"
+    ]
+  },
+  impressora: {
+    nome: "Impressoras & Escritório",
+    emojis: [
+      { e: "🖨️", d: "Impressora" }, { e: "📄", d: "Documentos" }, { e: "💼", d: "Home Office" },
+      { e: "💻", d: "Conexão Wi-Fi" }, { e: "💰", d: "Super Economia" }, { e: "🚀", d: "Alta Produtividade" },
+      { e: "💣", d: "Bomba de Oferta" }, { e: "🔥", d: "Mais Vendida" }, { e: "⚡", d: "Rápida e Prática" },
+      { e: "⭐", d: "Qualidade Profissional" }
+    ],
+    templates: [
+      "🖨️ IMPRESSÃO ECONÔMICA E DE ALTA QUALIDADE PARA SEU DIA A DIA",
+      "💰 ECONOMIA REAL DE TINTA PARA SUA CASA OU ESCRITÓRIO",
+      "💼 PRATICIDADE TOTAL COM CONEXÃO SEM FIO NO HOME OFFICE",
+      "💣 BOMBA! IMPRESSORA MULTIFUNCIONAL COM SUPER DESCONTO"
+    ]
+  },
+  automotivo: {
+    nome: "Automotivo & Moto",
+    emojis: [
+      { e: "🚗", d: "Carro" }, { e: "🏍️", d: "Moto" }, { e: "⚡", d: "Potência" },
+      { e: "🛠️", d: "Manutenção" }, { e: "💡", d: "LED / Iluminação" }, { e: "🛡️", d: "Segurança" },
+      { e: "💣", d: "Super Oferta" }, { e: "🔥", d: "Desconto Real" }, { e: "💸", d: "Economia" },
+      { e: "🏆", d: "Qualidade Comprovada" }
+    ],
+    templates: [
+      "🚗 SEGURANÇA, CONFORTO E PERFORMANCE PARA O SEU VEÍCULO",
+      "⚡ CUIDADO E POTÊNCIA PARA SEU CARRO OU MOTO NO DIA A DIA",
+      "🛠️ MANUTENÇÃO INTELIGENTE COM PREÇO BAIXO E ALTA QUALIDADE",
+      "💣 BOMBA! SUPER OFERTA AUTOMOTIVA SELECIONADA PELO PAIZÃO"
     ]
   },
   geral: {
-    nome: "Promoções Gerais & Achadinhos",
+    nome: "Promoções do Paizão & Achadinhos",
     emojis: [
-      { e: "🔥", d: "Super Oferta" },
-      { e: "⚡", d: "Relâmpago" },
-      { e: "💥", d: "Preço Explodiu" },
-      { e: "🚨", d: "Alerta Urgente" },
-      { e: "💣", d: "Bomba" },
-      { e: "🏆", d: "Top Escolha" },
-      { e: "⭐", d: "Destaque" },
-      { e: "🎯", d: "Achadinho Certeiro" },
-      { e: "🚀", d: "Corre que Acaba" },
-      { e: "💸", d: "Preço Baixo" },
-      { e: "🏷️", d: "Super Cupom" },
-      { e: "🎁", d: "Presente" }
+      { e: "🎯", d: "Achadinho Certeiro" }, { e: "🔥", d: "Super Oferta" }, { e: "⚡", d: "Relâmpago" },
+      { e: "💣", d: "Bomba" }, { e: "🏆", d: "Campeão de Vendas" }, { e: "⭐", d: "Destaque" },
+      { e: "💥", d: "Preço Explodiu" }, { e: "🚨", d: "Alerta Urgente" }, { e: "🚀", d: "Corre que Acaba" },
+      { e: "💸", d: "Preço Baixo" }, { e: "🏷️", d: "Super Cupom" }, { e: "🎁", d: "Oportunidade" }
     ],
     templates: [
-      "🔥 SUPER OFERTA EXCLUSIVA DO DIA",
-      "⚡ PROMOÇÃO RELÂMPAGO! CORRE QUE ACABA",
-      "💣 BOMBA! MENOR PREÇO DO ANO",
-      "🎯 ACHADINHO IMPERDÍVEL DO PAIZÃO",
-      "🚨 ALERTA DE PREÇO BAIXO! APROVEITE"
+      "🎯 ACHADINHO IMPERDÍVEL COM DESCONTO REAL SELECIONADO",
+      "🔥 SUPER OFERTA EXCLUSIVA SELECIONADA PELO PAIZÃO",
+      "⚡ PROMOÇÃO RELÂMPAGO! MENOR PREÇO DO MERCADO",
+      "💣 BOMBA! OPORTUNIDADE ÚNICA POR TEMPO LIMITADO",
+      "🏆 O CAMPEÃO DE VENDAS COM O MENOR PREÇO DO ANO"
     ]
   }
 };
@@ -830,19 +853,38 @@ let modoAba = 'auto';
 
 /* Detecta a categoria baseando-se no título ou URL */
 function identificarCategoria(texto) {
-  const t = (texto || '').toLowerCase();
-  if (t.includes('ar condicionado') || t.includes('climatizador') || t.includes('ventilador') || t.includes('split') || t.includes('btus') || t.includes('inverter') || t.includes('aquecedor')) {
+  const t = (texto || '').toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  if (t.match(/ar condicionado|climatizador|ventilador|split|btus|inverter|aquecedor|umidificador|desumidificador|difusor/)) {
     return 'clima';
-  } else if (t.includes('tenis') || t.includes('tênis') || t.includes('sapato') || t.includes('corrida') || t.includes('nike') || t.includes('adidas') || t.includes('olympikus') || t.includes('sandalia') || t.includes('calcado') || t.includes('camisa') || t.includes('bermuda')) {
-    return 'tenis';
-  } else if (t.includes('impressora') || t.includes('ecotank') || t.includes('epson') || t.includes('toner') || t.includes('multifuncional') || t.includes('cartucho')) {
+  }
+  if (t.match(/creatina|whey|suplemento|proteina|bcaa|glutamina|pre treino|albumina|colageno|pasta de amendoim|vitamina|creatina monohidratada|hipercalorico|halter|coqueteleira|strap/)) {
+    return 'suplementos';
+  }
+  if (t.match(/lavadora|lava jato|alta pressao|parafusadeira|furadeira|esmerilhadeira|makita|vonder|dewalt|bosch|wap|karcher|ferramenta|trena|serra|solda|alicate|inversora|maleta de ferramenta|chave de fenda|furadeira impacto/)) {
+    return 'ferramentas';
+  }
+  if (t.match(/impressora|ecotank|epson|toner|multifuncional|cartucho|papel a4|resma/)) {
     return 'impressora';
-  } else if (t.includes('fritadeira') || t.includes('air fryer') || t.includes('airfryer') || t.includes('panela') || t.includes('cafeteira') || t.includes('liquidificador') || t.includes('batedeira') || t.includes('microondas') || t.includes('forno')) {
+  }
+  if (t.match(/fritadeira|air fryer|airfryer|panela|cafeteira|liquidificador|batedeira|microondas|micro-ondas|forno|fogao|cooktop|geladeira|sanduicheira|mixer|chaleira|pote|faca|escorredor|garrafa termica|copo stanley|faqueiro/)) {
     return 'cozinha';
-  } else if (t.includes('celular') || t.includes('smartphone') || t.includes('fone') || t.includes('headset') || t.includes('airpod') || t.includes('smartwatch') || t.includes('relogio') || t.includes('gamer') || t.includes('xbox') || t.includes('playstation') || t.includes('ps5') || t.includes('som') || t.includes('jbl')) {
+  }
+  if (t.match(/celular|smartphone|iphone|samsung galaxy|xiaomi|motorola|fone|headset|headphone|airpod|earbud|smartwatch|relogio|gamer|mouse|teclado|monitor|notebook|pc gamer|computador|computador gamer|xbox|playstation|ps5|ps4|nintendo|alexa|echo|kindle|tablet|ipad|carregador|power bank|cabo usb|suporte celular|camera|jbl|caixa de som|ring light/)) {
     return 'tech';
-  } else if (t.includes('lixeira') || t.includes('aspirador') || t.includes('robo') || t.includes('sensor') || t.includes('mop') || t.includes('limpeza') || t.includes('travesseiro') || t.includes('colchao') || t.includes('toalha')) {
+  }
+  if (t.match(/lixeira|aspirador|robo aspirador|sensor|mop|limpeza|travesseiro|colchao|toalha|lencol|almofada|cortina|tapete|sofa|organizador|varal|sabao|amaciante|detergente|fechadura digital|lampada inteligente/)) {
     return 'casa';
+  }
+  if (t.match(/tenis|sapato|corrida|sneaker|caminhada|sandalia|chinelo|olympikus|nike|adidas|puma|asics|mizuno|calcado|bota|camisa|camiseta|bermuda|calca|moletom|jaqueta|vestido|cueca|meia/)) {
+    return 'tenis';
+  }
+  if (t.match(/perfume|colonia|desodorante|shampoo|condicionador|hidratante|creme|serum|skincare|protetor solar|maquiagem|batom|cabelo|secador|prancha|chapinha|escova secadora|barbeador|depilador|mascara capilar/)) {
+    return 'beleza';
+  }
+  if (t.match(/pneu|som automotivo|oleo motor|capacete|lampada automotiva|suporte veicular|central multimidia|carro|moto/)) {
+    return 'automotivo';
   }
   return 'geral';
 }
@@ -855,17 +897,24 @@ function renderizarToolbarEmojis(catKey) {
   
   // Renderiza botões de emojis
   const container = $('#emojiList');
-  container.innerHTML = dados.emojis.map(item => `
-    <button type="button" class="btn-emoji" onclick="inserirEmoji('${item.e}')" title="${item.d}">
-      ${item.e}
-    </button>
-  `).join('');
+  if (container) {
+    container.innerHTML = dados.emojis.map(item => `
+      <button type="button" class="btn-emoji" onclick="inserirEmoji('${item.e}')" title="${item.d}">
+        ${item.e}
+      </button>
+    `).join('');
+  }
 
-  // Renderiza templates sugeridos
+  // Renderiza templates sugeridos com emoji e trecho claro do benefício
   const tContainer = $('#templatesList');
-  tContainer.innerHTML = dados.templates.map(tpl => `
-    <span class="chip" onclick="setHeadline('${tpl.replace(/'/g, "\\'")}')">${tpl.split(' ').slice(0, 3).join(' ')}...</span>
-  `).join('');
+  if (tContainer) {
+    tContainer.innerHTML = dados.templates.map(tpl => {
+      const partes = tpl.split(' ');
+      const emoji = partes[0];
+      const textoCurto = partes.slice(1, 5).join(' ');
+      return `<span class="chip" onclick="setHeadline('${tpl.replace(/'/g, "\\'")}')" title="${tpl}">${emoji} ${textoCurto}...</span>`;
+    }).join('');
+  }
 }
 
 function selecionarAba(abaKey) {
@@ -873,17 +922,30 @@ function selecionarAba(abaKey) {
   
   // Atualiza botões de abas
   document.querySelectorAll('.tab-cat').forEach(b => b.classList.remove('ativa'));
+  if (window.event && window.event.target) {
+    window.event.target.classList.add('ativa');
+  }
   
   if (abaKey === 'auto') {
     const detected = identificarCategoria($('#inputTitulo').value + ' ' + $('#inputUrl').value);
     categoriaAtiva = detected;
     renderizarToolbarEmojis(detected);
-    event.target.classList.add('ativa');
   } else {
     categoriaAtiva = abaKey;
     renderizarToolbarEmojis(abaKey);
-    event.target.classList.add('ativa');
   }
+}
+
+function trocarHeadlineAleatoria() {
+  const dados = BANCO_EMOJIS[categoriaAtiva] || BANCO_EMOJIS.geral;
+  const templates = dados.templates;
+  const atual = ($('#inputHeadline').value || '').trim();
+  const disponiveis = templates.filter(t => t !== atual);
+  const escolhido = disponiveis.length > 0 
+    ? disponiveis[Math.floor(Math.random() * disponiveis.length)]
+    : templates[0];
+  setHeadline(escolhido);
+  toast('🎲 Headline alternada!');
 }
 
 function atualizarDeteccaoCategoria() {
