@@ -903,7 +903,7 @@
       <span style="color:#16A34A;font-weight:700;font-size:11px;background:#DCFCE7;padding:2px 8px;border-radius:99px">● Carregado</span>
     </div>
 
-    <div style="border:2px dashed #CBD5E1;border-radius:12px;padding:28px;text-align:center;cursor:pointer;background:#F8FAFC" onclick="$('#fileInputCsv').click()">
+    <div id="dropZoneCsv" style="border:2px dashed #CBD5E1;border-radius:12px;padding:28px;text-align:center;cursor:pointer;background:#F8FAFC;transition:all .2s" onclick="$('#fileInputCsv').click()">
       <div style="font-size:32px;margin-bottom:8px">📄</div>
       <b style="font-size:14px;color:var(--navy);display:block">Clique para escolher o arquivo CSV</b>
       <span style="font-size:12px;color:#64748B">ou arraste o arquivo aqui</span>
@@ -1588,136 +1588,206 @@ if (inpAvulso) {
   });
 }
 
-/* PROCESSADOR DE CSV IMPORTADO */
+/* PROCESSADOR DE CSV IMPORTADO (Parser Linear O(N) sem loop infinito) */
 function processarArquivoCsv(e) {
-  const file = e.target.files[0];
+  let file = null;
+  if (e && e.target && e.target.files && e.target.files.length > 0) {
+    file = e.target.files[0];
+  } else if (e && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    file = e.dataTransfer.files[0];
+  } else if (e instanceof File) {
+    file = e;
+  }
+
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function(evt) {
-    const raw = evt.target.result;
-    const lines = raw.split(/\r?\n/);
-    if (lines.length < 2) {
-      alert('Arquivo CSV vazio ou formato inválido.');
-      return;
-    }
-
-    // 1. Detecta delimitador (vírgula, ponto-e-vírgula ou tab)
-    const firstLine = lines[0];
-    let sep = ',';
-    if (firstLine.includes('\t')) {
-      sep = '\t';
-    } else if ((firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length) {
-      sep = ';';
-    }
-
-    // Função de extração de colunas CSV respeitando aspas e delimitador dinâmico
-    function parseCsvLine(str) {
-      if (sep === '\t') return str.split('\t').map(v => v.replace(/^"|"$/g, '').trim());
-      const regex = new RegExp(`(?:${sep}|\\n|^)("(?:(?:"")*[^"]*)*"|[^"${sep}\\n]*|(?:\\n|$))`, 'g');
-      const res = [];
-      let match;
-      while ((match = regex.exec(str)) !== null) {
-        let val = match[1];
-        if (val && val.startsWith('"') && val.endsWith('"')) {
-          val = val.substring(1, val.length - 1).replace(/""/g, '"');
-        }
-        res.push((val || '').trim());
-        if (regex.lastIndex >= str.length) break;
+    try {
+      const raw = evt.target.result;
+      if (!raw || !raw.trim()) {
+        alert('O arquivo selecionado está vazio.');
+        return;
       }
-      return res;
-    }
 
-    // Identificação dinâmica de colunas a partir do cabeçalho
-    const headerCols = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+      const lines = raw.split(/\r?\n/);
+      if (lines.length < 2) {
+        alert('Arquivo CSV vazio ou formato inválido.');
+        return;
+      }
 
-    // 1. Loja (identificada primeiro para não conflitar com a busca de 'nome')
-    let colShop = headerCols.findIndex(h => h.includes('loja') || h.includes('shop') || h.includes('vendedor') || h.includes('seller'));
+      // 1. Detecta delimitador (vírgula, ponto-e-vírgula ou tab)
+      const firstLine = lines[0];
+      let sep = ',';
+      if (firstLine.includes('\t')) {
+        sep = '\t';
+      } else if ((firstLine.match(/;/g) || []).length > (firstLine.match(/,/g) || []).length) {
+        sep = ';';
+      }
 
-    // 2. Título / Produto (exclui explicitamente qualquer coluna de loja ou ID)
-    let colTitle = headerCols.findIndex((h, idx) =>
-      idx !== colShop &&
-      (h.includes('produto') || h.includes('product') || h.includes('título') || h.includes('titulo') || h.includes('title') || h === 'item name' || h.includes('item name')) &&
-      !h.includes('id') && !h.includes('url') && !h.includes('link')
-    );
-    if (colTitle === -1) {
-      colTitle = headerCols.findIndex((h, idx) =>
-        idx !== colShop && h.includes('item') && !h.includes('id') && !h.includes('url') && !h.includes('link')
-      );
-    }
-    if (colTitle === -1) {
-      colTitle = headerCols.findIndex((h, idx) =>
-        idx !== colShop && h.includes('nome') && !h.includes('id') && !h.includes('url') && !h.includes('link')
-      );
-    }
-
-    // 3. Demais colunas
-    let colItemId = headerCols.findIndex(h => (h.includes('item') && h.includes('id')) || h.includes('itemid') || h.includes('código') || h === 'id');
-    let colPrice = headerCols.findIndex(h => h.includes('price') || h.includes('preço') || h.includes('preco') || h.includes('valor'));
-    let colSales = headerCols.findIndex(h => h.includes('sales') || h.includes('vendas') || h.includes('vendidos'));
-    let colCommRate = headerCols.findIndex(h => h.includes('commission rate') || h.includes('taxa de comiss') || h.includes('taxa'));
-    let colComm = headerCols.findIndex(h => (h.includes('commission') || h.includes('comissão') || h.includes('comissao') || h.includes('ganho')) && !h.includes('rate') && !h.includes('taxa'));
-    let colProdUrl = headerCols.findIndex(h => (h.includes('product') || h.includes('produto')) && (h.includes('url') || h.includes('link')));
-    let colOfferUrl = headerCols.findIndex(h => (h.includes('offer') || h.includes('afiliado') || h.includes('oferta') || h.includes('curto') || h.includes('short')) && (h.includes('url') || h.includes('link')));
-    let colImg = headerCols.findIndex(h => h.includes('image') || h.includes('imagem') || h.includes('foto') || h.includes('cover') || h.includes('thumbnail'));
-
-    // Fallbacks para índices padrão caso o relatório venha sem cabeçalhos textuais
-    if (colItemId === -1) colItemId = 0;
-    if (colTitle === -1) colTitle = (colShop === 1 ? 2 : 1);
-    if (colPrice === -1) colPrice = 2;
-    if (colSales === -1) colSales = 3;
-    if (colShop === -1) colShop = 4;
-    if (colCommRate === -1) colCommRate = 5;
-    if (colComm === -1) colComm = 6;
-    if (colProdUrl === -1) colProdUrl = 7;
-    if (colOfferUrl === -1) colOfferUrl = 8;
-
-    const novosProdutos = [];
-    for (let i = 1; i < lines.length; i++) {
-      let l = lines[i].trim();
-      if (!l) continue;
-
-      const cols = parseCsvLine(l);
-      if (cols.length >= 2) {
-        let tTitle = cols[colTitle] || '';
-        let tShop = (colShop !== -1 ? cols[colShop] : '') || '';
-
-        if (tTitle) {
-          const item = {
-            itemId: cols[colItemId] || '',
-            title: tTitle,
-            price: cols[colPrice] || '',
-            sales: cols[colSales] || '',
-            shopName: tShop,
-            commissionRate: cols[colCommRate] || '',
-            commission: cols[colComm] || '',
-            productUrl: cols[colProdUrl] || '',
-            offerUrl: cols[colOfferUrl] || ''
-          };
-
-          if (colImg !== -1 && cols[colImg]) {
-            item.image = cols[colImg];
+      // Parser linear seguro: O(N), imune a travamentos por aspas ou vírgulas vazias
+      function parseCsvLine(str) {
+        if (sep === '\t') {
+          return str.split('\t').map(v => v.replace(/^"|"$/g, '').trim());
+        }
+        const res = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < str.length; i++) {
+          const c = str[i];
+          if (c === '"') {
+            if (inQuotes && str[i + 1] === '"') {
+              cur += '"';
+              i++; // pula aspa duplicada escapada
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (c === sep && !inQuotes) {
+            res.push(cur.trim());
+            cur = '';
+          } else {
+            cur += c;
           }
+        }
+        res.push(cur.trim());
+        return res;
+      }
 
-          novosProdutos.push(item);
+      // Identificação dinâmica de colunas a partir do cabeçalho
+      const headerCols = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+
+      // 1. Loja (identificada primeiro para não conflitar com busca de 'nome')
+      let colShop = headerCols.findIndex(h => h.includes('loja') || h.includes('shop') || h.includes('vendedor') || h.includes('seller'));
+
+      // 2. Título / Produto (exclui explicitamente qualquer coluna de loja ou ID)
+      let colTitle = headerCols.findIndex((h, idx) =>
+        idx !== colShop &&
+        (h.includes('produto') || h.includes('product') || h.includes('título') || h.includes('titulo') || h.includes('title') || h === 'item name' || h.includes('item name')) &&
+        !h.includes('id') && !h.includes('url') && !h.includes('link')
+      );
+      if (colTitle === -1) {
+        colTitle = headerCols.findIndex((h, idx) =>
+          idx !== colShop && h.includes('item') && !h.includes('id') && !h.includes('url') && !h.includes('link')
+        );
+      }
+      if (colTitle === -1) {
+        colTitle = headerCols.findIndex((h, idx) =>
+          idx !== colShop && h.includes('nome') && !h.includes('id') && !h.includes('url') && !h.includes('link')
+        );
+      }
+
+      // 3. Demais colunas
+      let colItemId = headerCols.findIndex(h => (h.includes('item') && h.includes('id')) || h.includes('itemid') || h.includes('código') || h === 'id');
+      let colPrice = headerCols.findIndex(h => h.includes('price') || h.includes('preço') || h.includes('preco') || h.includes('valor'));
+      let colSales = headerCols.findIndex(h => h.includes('sales') || h.includes('vendas') || h.includes('vendidos'));
+      let colCommRate = headerCols.findIndex(h => h.includes('commission rate') || h.includes('taxa de comiss') || h.includes('taxa'));
+      let colComm = headerCols.findIndex(h => (h.includes('commission') || h.includes('comissão') || h.includes('comissao') || h.includes('ganho')) && !h.includes('rate') && !h.includes('taxa'));
+      let colProdUrl = headerCols.findIndex(h => (h.includes('product') || h.includes('produto')) && (h.includes('url') || h.includes('link')));
+      let colOfferUrl = headerCols.findIndex(h => (h.includes('offer') || h.includes('afiliado') || h.includes('oferta') || h.includes('curto') || h.includes('short')) && (h.includes('url') || h.includes('link')));
+      let colImg = headerCols.findIndex(h => h.includes('image') || h.includes('imagem') || h.includes('foto') || h.includes('cover') || h.includes('thumbnail'));
+
+      // Fallbacks para índices padrão caso o relatório venha sem cabeçalhos textuais
+      if (colItemId === -1) colItemId = 0;
+      if (colTitle === -1) colTitle = (colShop === 1 ? 2 : 1);
+      if (colPrice === -1) colPrice = 2;
+      if (colSales === -1) colSales = 3;
+      if (colShop === -1) colShop = 4;
+      if (colCommRate === -1) colCommRate = 5;
+      if (colComm === -1) colComm = 6;
+      if (colProdUrl === -1) colProdUrl = 7;
+      if (colOfferUrl === -1) colOfferUrl = 8;
+
+      const novosProdutos = [];
+      for (let i = 1; i < lines.length; i++) {
+        let l = lines[i].trim();
+        if (!l) continue;
+
+        const cols = parseCsvLine(l);
+        if (cols.length >= 2) {
+          let tTitle = cols[colTitle] || '';
+          let tShop = (colShop !== -1 ? cols[colShop] : '') || '';
+
+          if (tTitle) {
+            const item = {
+              itemId: cols[colItemId] || '',
+              title: tTitle,
+              price: cols[colPrice] || '',
+              sales: cols[colSales] || '',
+              shopName: tShop,
+              commissionRate: cols[colCommRate] || '',
+              commission: cols[colComm] || '',
+              productUrl: cols[colProdUrl] || '',
+              offerUrl: cols[colOfferUrl] || ''
+            };
+
+            if (colImg !== -1 && cols[colImg]) {
+              item.image = cols[colImg];
+            }
+
+            novosProdutos.push(item);
+          }
         }
       }
-    }
 
-    if (novosProdutos.length > 0) {
-      produtos = novosProdutos;
-      localStorage.setItem('shopee_csv_produtos_v2', JSON.stringify(novosProdutos));
-      atualizarNomeArquivoUI(file.name);
-      renderizarFila();
-      selecionarProduto(0);
-      fecharModalCsv();
-      toast(`✅ ${novosProdutos.length} produtos carregados de ${file.name}!`);
-    } else {
-      alert('Não foi possível reconhecer o padrão das colunas da Shopee neste CSV.');
+      if (novosProdutos.length > 0) {
+        produtos = novosProdutos;
+        try {
+          localStorage.setItem('shopee_csv_produtos_v2', JSON.stringify(novosProdutos));
+        } catch (eStorage) {
+          console.warn('LocalStorage sem espaço para todo o lote:', eStorage);
+        }
+        atualizarNomeArquivoUI(file.name);
+        renderizarFila();
+        selecionarProduto(0);
+        fecharModalCsv();
+        toast(`✅ ${novosProdutos.length} produtos carregados de ${file.name}!`);
+      } else {
+        alert('Não foi possível reconhecer o padrão das colunas da Shopee neste CSV.');
+      }
+    } catch (err) {
+      console.error('Erro ao processar CSV:', err);
+      alert('Ocorreu um erro ao processar o arquivo CSV: ' + (err.message || err));
+    } finally {
+      const inputEl = document.getElementById('fileInputCsv');
+      if (inputEl) inputEl.value = '';
     }
+  };
+  reader.onerror = function() {
+    alert('Erro ao ler o arquivo selecionado.');
+    const inputEl = document.getElementById('fileInputCsv');
+    if (inputEl) inputEl.value = '';
   };
   reader.readAsText(file, 'UTF-8');
 }
+
+// Configuração de Drag & Drop para o Modal CSV
+window.addEventListener('DOMContentLoaded', () => {
+  const dropZone = document.getElementById('dropZoneCsv');
+  if (dropZone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        dropZone.style.borderColor = 'var(--shopee)';
+        dropZone.style.background = '#FFF5F1';
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        dropZone.style.borderColor = '#CBD5E1';
+        dropZone.style.background = '#F8FAFC';
+      });
+    });
+    dropZone.addEventListener('drop', (ev) => {
+      const dt = ev.dataTransfer;
+      if (dt && dt.files && dt.files.length > 0) {
+        processarArquivoCsv(dt.files[0]);
+      }
+    });
+  }
+});
 
 // Inicializa a aplicação
 window.addEventListener('DOMContentLoaded', inicializar);
