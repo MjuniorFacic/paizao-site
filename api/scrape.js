@@ -213,15 +213,15 @@ export default async function handler(req, res) {
     const amazonPriceToPay = html.match(/class="[^"]*(?:apex-?price-?to-?pay|price-?to-?pay|corePriceDisplay)[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
                              html.match(/class="[^"]*apex-core-price-identifier[^"]*"[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
                              html.match(/id="corePriceDisplay_desktop_feature_div"[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
-                             html.match(/class="a-price-whole">([0-9\.\,]+)(?:<span class="a-price-decimal">[^<]*<\/span>)?<\/span><span class="a-price-fraction">([0-9]+)</i) ||
-                             html.match(/class="a-price-whole">([0-9\.\,]+)<span class="a-price-decimal">[^<]*<\/span><span class="a-price-fraction">([0-9]+)</i) ||
+                             html.match(/class="a-price-whole">([0-9\.\,]+)(?:<span class="a-price-decimal">[^<]*<\/span>)?<\/span>\s*<span class="a-price-fraction">([0-9]+)</i) ||
+                             html.match(/class="a-price-whole">([0-9\.\,]+)[\s\S]*?<span class="a-price-fraction">([0-9]+)</i) ||
                              html.match(/class="a-price\b[^"]*"[^>]*>[\s\S]*?<span class="a-offscreen">([^<]+)<\/span>/i) ||
                              html.match(/id="(?:priceblock_ourprice|priceblock_dealprice|price_inside_buybox)"[^>]*>([^<]+)<\/span>/i) ||
                              html.match(/"priceAmount":\s*([0-9\.]+)/i);
 
     if (amazonPriceToPay) {
       if (amazonPriceToPay[2]) {
-        pricePor = `${amazonPriceToPay[1].replace(/\./g, '')},${amazonPriceToPay[2]}`;
+        pricePor = `${amazonPriceToPay[1].replace(/<[^>]+>/g, '').replace(/\./g, '').replace(/[^\d]/g, '')},${amazonPriceToPay[2].replace(/[^\d]/g, '')}`;
       } else {
         const clean = amazonPriceToPay[1].replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '');
         if (clean) pricePor = clean;
@@ -279,29 +279,7 @@ export default async function handler(req, res) {
       priceDe = '';
     }
 
-    if (req.query.debug) {
-      const rMatches = (html.match(/R\$\s*[\d\.\,]+/gi) || []).slice(0, 15);
-      const offscreenMatches = (html.match(/<span class="a-offscreen">([^<]+)<\/span>/gi) || []).slice(0, 10);
-      const ldJsonMatches = (html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi) || []).slice(0, 3);
-      return res.status(200).json({
-        status: 'debug',
-        data: {
-          title,
-          image,
-          priceDe,
-          pricePor,
-          finalUrl,
-          htmlLength: html.length,
-          hasPriceWhole: html.includes('a-price-whole'),
-          hasOffscreen: html.includes('a-offscreen'),
-          hasApexPrice: html.includes('apex'),
-          hasCenterCol: html.includes('centerCol'),
-          rMatches,
-          offscreenMatches,
-          ldJsonMatches
-        }
-      });
-    }
+
 
     return res.status(200).json({
       status: 'success',

@@ -1121,40 +1121,81 @@ async function buscarDadosOferta() {
       console.log('Scraper parallel fallback...', eV);
     }
 
-    // 2. Se faltou título, imagem ou preço, tenta Microlink com seletores Mercado Livre e Amazon
+    // 2. Se faltou título, imagem ou preço, tenta Microlink com seletores específicos por loja
     if (!tituloExtraido || !imagemExtraida || !precoPorExtraido) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5500);
-        const microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}&data.priceDe.selector=.basisPrice .a-offscreen, .apex-basisprice-offscreen-label, [data-a-strike="true"] .a-offscreen, s .andes-money-amount__fraction&data.centsDe.selector=s .andes-money-amount__cents&data.pricePor.selector=.apex-pricetopay-value .a-offscreen, .priceToPay .a-offscreen, #corePriceDisplay_desktop_feature_div .a-offscreen, .a-price-whole, .andes-money-amount:not(s) .andes-money-amount__fraction&data.centsPor.selector=.a-price-fraction, .andes-money-amount:not(s) .andes-money-amount__cents`;
-        
+        const timeoutId = setTimeout(() => controller.abort(), 6500);
+        const isAmazon = /amazon|amzn|a\.co/i.test(url);
+        let microUrl = '';
+
+        if (isAmazon) {
+          microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}` +
+            `&data.amzPay.selector=.apex-pricetopay-value%20.a-offscreen%2C%20%23corePriceDisplay_desktop_feature_div%20.a-offscreen%2C%20.priceToPay%20.a-offscreen%2C%20.apex-core-price-identifier%20.a-offscreen` +
+            `&data.amzWhole.selector=.a-price-whole` +
+            `&data.amzFraction.selector=.a-price-fraction` +
+            `&data.amzDe.selector=.basisPrice%20.a-offscreen%2C%20.a-text-price%20.a-offscreen%2C%20%5Bdata-a-strike%3D%22true%22%5D%20.a-offscreen%2C%20.apex-basisprice-offscreen-label` +
+            `&data.amzText.selector=.a-color-price`;
+        } else {
+          microUrl = `https://api.microlink.io?url=${encodeURIComponent(url)}` +
+            `&data.priceDe.selector=s%20.andes-money-amount__fraction%2C%20.ui-pdp-price__original-value%20.andes-money-amount__fraction` +
+            `&data.centsDe.selector=s%20.andes-money-amount__cents%2C%20.ui-pdp-price__original-value%20.andes-money-amount__cents` +
+            `&data.pricePor.selector=.andes-money-amount%3Anot(s)%20.andes-money-amount__fraction%2C%20.ui-pdp-price__second-line%20.andes-money-amount__fraction` +
+            `&data.centsPor.selector=.andes-money-amount%3Anot(s)%20.andes-money-amount__cents%2C%20.ui-pdp-price__second-line%20.andes-money-amount__cents`;
+        }
+
         const resMicro = await fetch(microUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (resMicro.ok) {
           const dataMicro = await resMicro.json();
           if (dataMicro.status === 'success' && dataMicro.data) {
-            if (!tituloExtraido && dataMicro.data.title && !dataMicro.data.title.includes('Não foi possível')) {
-              tituloExtraido = dataMicro.data.title;
+            if (!tituloExtraido || tituloExtraido === 'Galeria de produtos') {
+              if (dataMicro.data.title && !dataMicro.data.title.includes('Galeria de produtos') && !dataMicro.data.title.includes('Não foi possível')) {
+                tituloExtraido = dataMicro.data.title;
+              } else if (dataMicro.data.description) {
+                const descClean = dataMicro.data.description.split(' : Amazon')[0].split(' | Amazon')[0].trim();
+                if (descClean && descClean.length > 5) tituloExtraido = descClean;
+              }
             }
-            if (!imagemExtraida && dataMicro.data.image?.url && !dataMicro.data.image.url.includes('error/logo')) {
+
+            if (!imagemExtraida && dataMicro.data.image?.url && !dataMicro.data.image.url.includes('error/logo') && !dataMicro.data.image.url.includes('uedata')) {
               imagemExtraida = dataMicro.data.image.url;
             }
 
             function formatarPrecoRaw(val, cents) {
               if (!val) return '';
-              let s = String(val).replace(/&nbsp;/g, ' ').replace(/[^\d\,]/g, '').trim();
-              if (s.includes(',')) return s;
+              let cleanStr = String(val).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+              const matchVirgula = cleanStr.match(/(\d+(?:\.\d+)*),(\d{2})/);
+              if (matchVirgula) {
+                return `${matchVirgula[1].replace(/\./g, '')},${matchVirgula[2]}`;
+              }
+              let s = cleanStr.replace(/[^\d]/g, '');
+              if (!s) return '';
               let c = cents ? String(cents).replace(/[^\d]/g, '') : '00';
               if (c.length === 1) c += '0';
               return `${s},${c}`;
             }
 
-            if (dataMicro.data.priceDe && !precoDeExtraido) {
-              precoDeExtraido = formatarPrecoRaw(dataMicro.data.priceDe, dataMicro.data.centsDe);
-            }
-
-            if (dataMicro.data.pricePor && !precoPorExtraido) {
-              precoPorExtraido = formatarPrecoRaw(dataMicro.data.pricePor, dataMicro.data.centsPor);
+            if (isAmazon) {
+              if (dataMicro.data.amzPay && !precoPorExtraido) {
+                precoPorExtraido = formatarPrecoRaw(dataMicro.data.amzPay);
+              }
+              if (!precoPorExtraido && dataMicro.data.amzWhole) {
+                precoPorExtraido = formatarPrecoRaw(dataMicro.data.amzWhole, dataMicro.data.amzFraction);
+              }
+              if (!precoPorExtraido && dataMicro.data.amzText) {
+                precoPorExtraido = formatarPrecoRaw(dataMicro.data.amzText);
+              }
+              if (dataMicro.data.amzDe && !precoDeExtraido) {
+                precoDeExtraido = formatarPrecoRaw(dataMicro.data.amzDe);
+              }
+            } else {
+              if (dataMicro.data.priceDe && !precoDeExtraido) {
+                precoDeExtraido = formatarPrecoRaw(dataMicro.data.priceDe, dataMicro.data.centsDe);
+              }
+              if (dataMicro.data.pricePor && !precoPorExtraido) {
+                precoPorExtraido = formatarPrecoRaw(dataMicro.data.pricePor, dataMicro.data.centsPor);
+              }
             }
           }
         }
